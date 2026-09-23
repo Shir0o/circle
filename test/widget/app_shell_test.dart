@@ -99,10 +99,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(FormScreen), findsOneWidget);
-    expect(find.text('Add Person'), findsOneWidget);
+    expect(find.text('Add person'), findsOneWidget);
 
     // Closing the form returns to Overview: the tab selection did not change.
-    await tester.pageBack();
+    await tester.tap(find.byKey(const Key('form-cancel')));
     await tester.pumpAndSettle();
     expect(dotDecoration(tester, 'overview').color, accent);
     expect(find.text('Insights & stats across your circle'), findsOneWidget);

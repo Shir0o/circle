@@ -46,7 +46,7 @@ class _FormScreenState extends State<FormScreen> {
     _nameController = TextEditingController(text: p?.name ?? '');
     _bMonth = p?.bMonth ?? 1;
     _bDayController = TextEditingController(
-      text: p?.bDay != null ? p!.bDay.toString() : '1',
+      text: p?.bDay != null ? p!.bDay.toString() : '',
     );
     _bYearController = TextEditingController(
       text: p?.bYear != null ? p!.bYear.toString() : '',
@@ -65,6 +65,12 @@ class _FormScreenState extends State<FormScreen> {
     );
     _howKnowController = TextEditingController(text: p?.howKnow ?? '');
     _notesController = TextEditingController(text: p?.notes ?? '');
+
+    _nameController.addListener(_onFormChanged);
+  }
+
+  void _onFormChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -83,6 +89,17 @@ class _FormScreenState extends State<FormScreen> {
     _howKnowController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  String get _initials {
+    final words = _nameController.text
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    if (words.isEmpty) return '?';
+    if (words.length == 1) return words[0][0].toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
   }
 
   void _save() {
@@ -162,304 +179,466 @@ class _FormScreenState extends State<FormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final tokens = context.tokens;
     final isEditing = widget.person != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? 'Edit Person' : 'Add Person'),
-        actions: [
+      body: SafeArea(
+        child: Column(
+          children: [
+            _header(tokens, isEditing),
+            Expanded(
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(22, 4, 22, 32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(child: _avatarPreview(tokens)),
+                      const SizedBox(height: 22),
+                      _microLabel(tokens, 'Full name'),
+                      const SizedBox(height: 8),
+                      _nameField(tokens),
+                      const SizedBox(height: 18),
+                      _microLabel(tokens, 'Life stage'),
+                      const SizedBox(height: 8),
+                      _stageSelector(tokens),
+                      const SizedBox(height: 18),
+                      _microLabel(tokens, 'Birthday'),
+                      const SizedBox(height: 8),
+                      _birthdayRow(tokens),
+                      const SizedBox(height: 18),
+                      ..._stageSpecificFields(tokens),
+                      const SizedBox(height: 18),
+                      _microLabel(tokens, 'Location'),
+                      const SizedBox(height: 8),
+                      _field(
+                        key: const Key('field-location'),
+                        controller: _locationController,
+                        hint: 'e.g. City',
+                      ),
+                      const SizedBox(height: 18),
+                      _microLabel(
+                        tokens,
+                        'Interests',
+                        suffix: '· comma-separated',
+                      ),
+                      const SizedBox(height: 8),
+                      _field(
+                        key: const Key('field-interests'),
+                        controller: _interestsController,
+                        hint: 'e.g. Hiking, Piano, Anime',
+                      ),
+                      const SizedBox(height: 18),
+                      _microLabel(
+                        tokens,
+                        'Dietary',
+                        suffix: '· comma-separated',
+                      ),
+                      const SizedBox(height: 8),
+                      _field(
+                        key: const Key('field-dietary'),
+                        controller: _dietaryController,
+                        hint: 'e.g. Vegetarian, No nuts',
+                      ),
+                      const SizedBox(height: 18),
+                      _microLabel(tokens, 'How I know them'),
+                      const SizedBox(height: 8),
+                      _field(
+                        key: const Key('field-howknow'),
+                        controller: _howKnowController,
+                        hint: 'e.g. College friend',
+                      ),
+                      const SizedBox(height: 18),
+                      _microLabel(tokens, 'Notes & preferences'),
+                      const SizedBox(height: 8),
+                      _field(
+                        key: const Key('field-notes'),
+                        controller: _notesController,
+                        hint: 'Anything you want to remember',
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 28),
+                      if (isEditing) _deleteButton(tokens),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _header(DesignTokens tokens, bool isEditing) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 6, 12, 4),
+      child: Row(
+        children: [
+          InkWell(
+            key: const Key('form-cancel'),
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(999),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: tokens.muted,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              isEditing ? 'Edit person' : 'Add person',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: tokens.text,
+              ),
+            ),
+          ),
           const ThemeToggleButton(),
           const SizedBox(width: 8),
-          TextButton(
-            onPressed: _save,
-            child: const Text(
-              'Save',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+          InkWell(
+            key: const Key('form-save'),
+            onTap: _save,
+            borderRadius: BorderRadius.circular(999),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+              child: Text(
+                'Save',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: tokens.accent,
+                ),
+              ),
             ),
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Life Stage Selector
-              Text('Life Stage', style: theme.textTheme.titleMedium),
-              const SizedBox(height: 8),
-              Row(
-                children: LifeStage.values.map((stage) {
-                  final isActive = _stage == stage;
-                  final meta = stage;
+    );
+  }
 
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: InkWell(
-                        onTap: () => setState(() => _stage = stage),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? meta.avatarBg
-                                : (theme.cardTheme.color ??
-                                      theme.colorScheme.surface),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isActive
-                                  ? meta.avatarBg
-                                  : tokens.chipBorder,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              stage.label,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: isActive
-                                    ? Colors.white
-                                    : tokens.chipText,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+  Widget _avatarPreview(DesignTokens tokens) {
+    return CircleAvatar(
+      key: const Key('form-avatar'),
+      radius: 38,
+      backgroundColor: _stage.avatarBg,
+      child: Text(
+        _initials,
+        style: TextStyle(
+          color: _stage.avatarColor,
+          fontWeight: FontWeight.w900,
+          fontSize: 26,
+        ),
+      ),
+    );
+  }
 
-              const SizedBox(height: 20),
+  Widget _microLabel(DesignTokens tokens, String label, {String? suffix}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.08,
+            color: tokens.faint,
+          ),
+        ),
+        if (suffix != null)
+          Text(
+            ' $suffix',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: tokens.faint,
+            ),
+          ),
+      ],
+    );
+  }
 
-              // Name Field
-              Text('Full Name *', style: theme.textTheme.titleMedium),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _nameController,
-                validator: (val) => val == null || val.trim().isEmpty
-                    ? 'Name is required'
-                    : null,
-                decoration: const InputDecoration(hintText: 'e.g. Maya Chen'),
-              ),
+  Widget _field({
+    required Key key,
+    required TextEditingController controller,
+    required String hint,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
+    final tokens = context.tokens;
+    return TextFormField(
+      key: key,
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: tokens.text,
+      ),
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: tokens.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
+        ),
+        hintStyle: TextStyle(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w500,
+          color: tokens.faint,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.inputBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.inputBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.accent, width: 1.5),
+        ),
+      ),
+    );
+  }
 
-              const SizedBox(height: 20),
+  Widget _nameField(DesignTokens tokens) {
+    return TextFormField(
+      key: const Key('field-name'),
+      controller: _nameController,
+      validator: (val) =>
+          val == null || val.trim().isEmpty ? 'Name is required' : null,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: tokens.text,
+      ),
+      decoration: InputDecoration(
+        hintText: 'e.g. Maya Chen',
+        filled: true,
+        fillColor: tokens.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
+        ),
+        hintStyle: TextStyle(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w500,
+          color: tokens.faint,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.inputBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.inputBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.accent, width: 1.5),
+        ),
+      ),
+    );
+  }
 
-              // Birthday Fields
-              Text('Birthday', style: theme.textTheme.titleMedium),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<int>(
-                      initialValue: _bMonth,
-                      items: List.generate(12, (index) {
-                        return DropdownMenuItem(
-                          value: index + 1,
-                          child: Text(months[index]),
-                        );
-                      }),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _bMonth = val);
-                      },
-                      decoration: const InputDecoration(labelText: 'Month'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 1,
-                    child: TextFormField(
-                      controller: _bDayController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Day'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 1,
-                    child: TextFormField(
-                      controller: _bYearController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Year (opt)',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Conditional Fields by Stage
-              if (_stage == LifeStage.college) ...[
-                Text('College Details', style: theme.textTheme.titleMedium),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _yearController,
-                        decoration: const InputDecoration(
-                          hintText: 'Year (e.g. Junior)',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _majorController,
-                        decoration: const InputDecoration(
-                          hintText: 'Major (e.g. Psychology)',
-                        ),
-                      ),
-                    ),
-                  ],
+  Widget _stageSelector(DesignTokens tokens) {
+    return Row(
+      children: LifeStage.values.map((stage) {
+        final isActive = _stage == stage;
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: InkWell(
+              key: Key('stage-segment-${stage.serialized}'),
+              onTap: () => setState(() => _stage = stage),
+              borderRadius: BorderRadius.circular(11),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: isActive ? stage.avatarBg : tokens.track,
+                  borderRadius: BorderRadius.circular(11),
                 ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _schoolController,
-                  decoration: const InputDecoration(
-                    hintText: 'School / University (e.g. UCLA)',
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ] else if (_stage == LifeStage.teens ||
-                  _stage == LifeStage.kids) ...[
-                Text('School Details', style: theme.textTheme.titleMedium),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _gradeController,
-                        decoration: const InputDecoration(
-                          hintText: 'Grade (e.g. 10th grade)',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _schoolController,
-                        decoration: const InputDecoration(
-                          hintText: 'School (e.g. Lincoln HS)',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-              ] else ...[
-                Text('Work Details', style: theme.textTheme.titleMedium),
-                const SizedBox(height: 6),
-                TextFormField(
-                  controller: _occupationController,
-                  decoration: const InputDecoration(
-                    hintText: 'Occupation (e.g. Software Engineer)',
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-
-              // Location
-              Text('Location', style: theme.textTheme.titleMedium),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _locationController,
-                decoration: const InputDecoration(
-                  hintText: 'City / Region (e.g. San Francisco)',
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Interests
-              Text(
-                'Interests (comma separated)',
-                style: theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _interestsController,
-                decoration: const InputDecoration(
-                  hintText: 'e.g. Photography, Hiking, Chess',
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Dietary
-              Text(
-                'Dietary Preferences (comma separated)',
-                style: theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _dietaryController,
-                decoration: const InputDecoration(
-                  hintText: 'e.g. Vegetarian, Gluten-free',
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Connection
-              Text('How you know them', style: theme.textTheme.titleMedium),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _howKnowController,
-                decoration: const InputDecoration(
-                  hintText: 'e.g. College friend, Old roommate',
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Notes
-              Text('Notes', style: theme.textTheme.titleMedium),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _notesController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  hintText: 'Personal notes or gift ideas...',
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Delete Button (if editing)
-              if (isEditing)
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _delete,
-                    icon: Icon(
-                      Icons.delete_outline_rounded,
-                      color: tokens.danger,
-                    ),
-                    label: Text(
-                      'Delete Person',
-                      style: TextStyle(color: tokens.danger),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: tokens.danger),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+                child: Center(
+                  child: Text(
+                    stage.label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: isActive ? Colors.white : tokens.chipText,
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 
-              const SizedBox(height: 40),
-            ],
+  Widget _birthdayRow(DesignTokens tokens) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 14,
+          child: DropdownButtonFormField<int>(
+            key: const Key('field-birthday-month'),
+            initialValue: _bMonth,
+            items: List.generate(12, (index) {
+              return DropdownMenuItem(
+                value: index + 1,
+                child: Text(months[index]),
+              );
+            }),
+            onChanged: (val) {
+              if (val != null) setState(() => _bMonth = val);
+            },
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: tokens.text,
+            ),
+            dropdownColor: tokens.surface,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: tokens.surface,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 13,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(13),
+                borderSide: BorderSide(color: tokens.inputBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(13),
+                borderSide: BorderSide(color: tokens.inputBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(13),
+                borderSide: BorderSide(color: tokens.accent, width: 1.5),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 10,
+          child: _field(
+            key: const Key('field-birthday-day'),
+            controller: _bDayController,
+            hint: 'Day',
+            keyboardType: TextInputType.number,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 12,
+          child: _field(
+            key: const Key('field-birthday-year'),
+            controller: _bYearController,
+            hint: 'Year',
+            keyboardType: TextInputType.number,
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _stageSpecificFields(DesignTokens tokens) {
+    switch (_stage) {
+      case LifeStage.college:
+        return [
+          _microLabel(tokens, 'Year in school'),
+          const SizedBox(height: 8),
+          _field(
+            key: const Key('field-year'),
+            controller: _yearController,
+            hint: 'e.g. Junior',
+          ),
+          const SizedBox(height: 14),
+          _microLabel(tokens, 'Major'),
+          const SizedBox(height: 8),
+          _field(
+            key: const Key('field-major'),
+            controller: _majorController,
+            hint: 'e.g. Psychology',
+          ),
+          const SizedBox(height: 14),
+          _microLabel(tokens, 'College'),
+          const SizedBox(height: 8),
+          _field(
+            key: const Key('field-college'),
+            controller: _schoolController,
+            hint: 'e.g. UCLA',
+          ),
+        ];
+      case LifeStage.teens:
+      case LifeStage.kids:
+        return [
+          _microLabel(tokens, 'Grade'),
+          const SizedBox(height: 8),
+          _field(
+            key: const Key('field-grade'),
+            controller: _gradeController,
+            hint: 'e.g. 10th grade',
+          ),
+          const SizedBox(height: 14),
+          _microLabel(tokens, 'School'),
+          const SizedBox(height: 8),
+          _field(
+            key: const Key('field-school'),
+            controller: _schoolController,
+            hint: 'e.g. Lincoln HS',
+          ),
+        ];
+      case LifeStage.working:
+        return [
+          _microLabel(tokens, 'Occupation'),
+          const SizedBox(height: 8),
+          _field(
+            key: const Key('field-occupation'),
+            controller: _occupationController,
+            hint: 'e.g. Nurse',
+          ),
+        ];
+    }
+  }
+
+  Widget _deleteButton(DesignTokens tokens) {
+    return Align(
+      alignment: Alignment.center,
+      child: InkWell(
+        key: const Key('delete-person'),
+        onTap: _delete,
+        borderRadius: BorderRadius.circular(999),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Text(
+            'Delete person',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: tokens.danger,
+            ),
           ),
         ),
       ),
