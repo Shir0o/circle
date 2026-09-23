@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/month_names.dart';
+import '../models/person.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
 import 'profile_screen.dart';
@@ -11,170 +12,197 @@ class BirthdaysScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<PeopleProvider>(context);
-    final theme = Theme.of(context);
     final tokens = context.tokens;
-    final upcomingList = provider.upcomingBirthdays;
+    final entries = provider.upcomingBirthdays;
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header: title and subtitle.
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              padding: const EdgeInsets.fromLTRB(22, 10, 22, 6),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Birthdays', style: theme.textTheme.displayLarge),
+                  Text(
+                    'Birthdays',
+                    key: const Key('birthdays-title'),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.02,
+                      color: tokens.text,
+                      height: 1,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
-                    'Upcoming celebrations across your circle',
-                    style: theme.textTheme.bodyMedium,
+                    'Next up in your circle',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: tokens.muted,
+                    ),
                   ),
                 ],
               ),
             ),
+
+            // Birthday rows or an empty state.
             Expanded(
-              child: upcomingList.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No upcoming birthdays',
-                        style: theme.textTheme.bodyLarge,
-                      ),
-                    )
+              child: entries.isEmpty
+                  ? _buildEmptyState(context, tokens)
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-                      itemCount: upcomingList.length,
+                      padding: const EdgeInsets.fromLTRB(18, 2, 18, 20),
+                      itemCount: entries.length,
                       itemBuilder: (context, index) {
-                        final entry = upcomingList[index];
-                        final person = entry.key;
-                        final days = entry.value;
-
-                        final meta = person.stage;
-                        final turns = person.turnsAge(
-                          referenceDate: provider.today,
-                        );
-                        final isSoon = days <= 30;
-
-                        final dateLine =
-                            '${monthNames[person.bMonth - 1]} ${person.bDay}${turns != null ? ' · turns $turns' : ''}';
-
-                        Color cardBg;
-                        Color cardBorder;
-                        if (isSoon) {
-                          cardBg = tokens.accentSoft;
-                          cardBorder = tokens.accentBorder;
-                        } else {
-                          cardBg =
-                              theme.cardTheme.color ??
-                              theme.colorScheme.surface;
-                          cardBorder = tokens.border;
-                        }
-
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: cardBorder, width: 1),
-                          ),
-                          child: InkWell(
-                            onTap: () {
-                              provider.selectPerson(person);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProfileScreen(person: person),
-                                ),
-                              );
-                            },
-                            borderRadius: BorderRadius.circular(16),
-                            child: Padding(
-                              padding: const EdgeInsets.all(14),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 22,
-                                    backgroundColor: meta.avatarBg,
-                                    child: Text(
-                                      person.initials,
-                                      style: TextStyle(
-                                        color: meta.avatarColor,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 14),
-
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          person.name,
-                                          style: theme.textTheme.titleMedium,
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          dateLine,
-                                          style: theme.textTheme.bodyMedium,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // Days Counter Badge
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: isSoon
-                                          ? theme.colorScheme.primary
-                                          : tokens.divider,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          days == 0 ? '🎉' : '$days',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w800,
-                                            color: isSoon
-                                                ? Colors.white
-                                                : tokens.text,
-                                          ),
-                                        ),
-                                        Text(
-                                          days == 0
-                                              ? 'today'
-                                              : (days == 1 ? 'day' : 'days'),
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600,
-                                            color: isSoon
-                                                ? Colors.white.withValues(
-                                                    alpha: 0.9,
-                                                  )
-                                                : tokens.muted,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                        final entry = entries[index];
+                        return _BirthdayRow(
+                          person: entry.key,
+                          days: entry.value,
                         );
                       },
                     ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, DesignTokens tokens) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.cake_outlined, size: 48, color: tokens.faint),
+          const SizedBox(height: 12),
+          Text(
+            'No birthdays yet',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: tokens.text,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Add people to your circle and their birthdays will show up here',
+            style: theme.textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BirthdayRow extends StatelessWidget {
+  final Person person;
+  final int days;
+
+  const _BirthdayRow({required this.person, required this.days});
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<PeopleProvider>(context);
+    final tokens = context.tokens;
+    final isSoon = days <= 30;
+    final turns = person.turnsAge(referenceDate: provider.today);
+    final dateLine =
+        '${monthNames[person.bMonth - 1]} ${person.bDay}'
+        '${turns != null ? ' · turns $turns' : ''}';
+
+    return Container(
+      key: Key('birthday-row-${person.id}'),
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: isSoon ? tokens.accentSoft : tokens.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isSoon ? tokens.accentBorder : tokens.border,
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          provider.selectPerson(person);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ProfileScreen(person: person)),
+          );
+        },
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: person.stage.avatarBg,
+                child: Text(
+                  person.initials,
+                  style: TextStyle(
+                    color: person.stage.avatarColor,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      person.name,
+                      style: TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w800,
+                        color: tokens.text,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      dateLine,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: tokens.muted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    days == 0 ? '🎉' : '$days',
+                    key: Key('birthday-count-${person.id}'),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      color: isSoon ? tokens.accent : tokens.text,
+                    ),
+                  ),
+                  Text(
+                    days == 0 ? 'today' : (days == 1 ? 'day' : 'days'),
+                    key: Key('birthday-unit-${person.id}'),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: tokens.faint,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
