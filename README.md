@@ -1,22 +1,22 @@
-# Circle · Organization Member Tracking App
+# Circle
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.44.6-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.12.2-0175C2?logo=dart)](https://dart.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Circle** is a modern, responsive cross-platform member tracking application built with Flutter. It allows organizations, community groups, and teams to track members across life stages (`Kids`, `Teens`, `College`, `Working`), celebrate upcoming birthdays, manage dietary preferences and contact connections, and view organizational demographics.
+**Circle** is a modern, responsive cross-platform people tracking application built with Flutter. It helps you keep track of your people across life stages (`Kids`, `Teens`, `College`, `Working`), celebrate upcoming birthdays, manage dietary preferences and contact connections, and view demographics across your circle.
 
 ---
 
 ## ✨ Features
 
-- 👥 **Member Directory**: Fast real-time search, life stage filter chips (`All`, `Kids`, `Teens`, `College`, `Working`), and detailed member cards.
+- 👥 **People Directory**: Fast real-time search, life stage filter chips (`All`, `Kids`, `Teens`, `College`, `Working`), and detailed person cards.
 - 👤 **Detailed Profiles**: Full view of education (Year/Major/School), career, birthday, location, interests, dietary preferences, and personal notes.
-- ✏️ **Dynamic Member Form**: Add or edit member details with stage-specific inputs, date picker, and tag management.
-- 🎂 **Upcoming Birthdays**: Sorted list of member birthdays with days until celebration, turning age calculations, and highlight indicators for birthdays within 30 days.
-- 📊 **Demographics Overview**: Visual statistics including total member count, birthdays in the current month, life stage distribution progress bars, and top member locations.
+- ✏️ **Dynamic Person Form**: Add or edit person details with stage-specific inputs, date picker, and tag management.
+- 🎂 **Upcoming Birthdays**: Sorted list of upcoming birthdays with days until celebration, turning age calculations, and highlight indicators for birthdays within 30 days.
+- 📊 **Demographics Overview**: Visual statistics including total people, birthdays in the current month, life stage distribution progress bars, and top locations.
 - 🌗 **Light & Dark Mode**: Modern warm light theme and rich dark theme with persistent preference saving.
-- 💾 **Local Persistence**: Automatic JSON state storage via `shared_preferences` seeded with default member data.
+- 💾 **Local Persistence**: Automatic JSON state storage via `shared_preferences`.
 
 ---
 
@@ -79,9 +79,9 @@ lib/
 │   └── app_theme.dart          # Light and dark color palettes, typography & component themes
 └── screens/
     ├── main_screen.dart        # Navigation scaffold & theme switcher
-    ├── directory_screen.dart   # Member list, search bar & filter chips
-    ├── profile_screen.dart     # Member detail view
-    ├── form_screen.dart        # Add/edit member form
+    ├── directory_screen.dart   # People list, search bar & filter chips
+    ├── profile_screen.dart     # Person detail view
+    ├── form_screen.dart        # Add/edit person form
     ├── birthdays_screen.dart   # Sorted birthday celebrations & countdown badges
     └── overview_screen.dart    # Visual analytics & location demographics dashboard
 ```

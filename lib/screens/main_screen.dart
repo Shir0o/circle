@@ -1,7 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
+import '../widgets/app_chrome.dart';
 import 'directory_screen.dart';
 import 'birthdays_screen.dart';
 import 'overview_screen.dart';
@@ -17,117 +18,120 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final _screens = const [
-    DirectoryScreen(),
-    BirthdaysScreen(),
-    OverviewScreen(),
-  ];
+  void _switchTab(int index) {
+    setState(() => _currentIndex = index);
+  }
+
+  void _handleTab(int index) {
+    if (index == 3) {
+      _openAdd();
+    } else {
+      _switchTab(index);
+    }
+  }
+
+  void _openAdd() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const FormScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<PeopleProvider>(context);
-    final theme = Theme.of(context);
+    return Scaffold(
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            const AppTopRow(),
+            Expanded(
+              child: MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: IndexedStack(
+                  index: _currentIndex,
+                  children: [
+                    DirectoryScreen(onSwitchTab: _switchTab),
+                    const BirthdaysScreen(),
+                    const OverviewScreen(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _CircleTabBar(
+        currentIndex: _currentIndex,
+        onSelect: _handleTab,
+      ),
+    );
+  }
+}
+
+class _CircleTabBar extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onSelect;
+
+  const _CircleTabBar({required this.currentIndex, required this.onSelect});
+
+  static const _tabs = ['Directory', 'Birthdays', 'Overview', 'Add'];
+
+  @override
+  Widget build(BuildContext context) {
     final tokens = context.tokens;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.people_alt_rounded,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              'Circle',
-              style: theme.appBarTheme.titleTextStyle,
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              provider.isDarkMode ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-            ),
-            tooltip: 'Toggle Theme',
-            onPressed: () => provider.toggleTheme(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_rounded),
-            tooltip: 'Add Member',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const FormScreen(),
+    return Container(
+      key: const Key('circle-tab-bar'),
+      height: 64,
+      decoration: BoxDecoration(
+        color: tokens.tabbar,
+        border: Border(top: BorderSide(color: tokens.border, width: 1)),
+      ),
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Row(
+            children: _tabs.asMap().entries.map((entry) {
+              final index = entry.key;
+              final label = entry.value;
+              final isAdd = index == 3;
+              final active = !isAdd && index == currentIndex;
+              final color = active ? tokens.accent : tokens.tabInactive;
+
+              return Expanded(
+                child: GestureDetector(
+                  key: Key('tab-${label.toLowerCase()}'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => onSelect(index),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        key: Key('tab-dot-${label.toLowerCase()}'),
+                        width: 5,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: active ? tokens.accent : Colors.transparent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          color: color,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
-            },
+            }).toList(),
           ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: theme.cardTheme.color,
-          border: Border(
-            top: BorderSide(
-              color: tokens.divider,
-              width: 1,
-            ),
-          ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            if (index == 3) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const FormScreen(),
-                ),
-              );
-            } else {
-              setState(() => _currentIndex = index);
-            }
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          selectedItemColor: theme.colorScheme.primary,
-          unselectedItemColor: tokens.tabInactive,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.contacts_rounded),
-              label: 'Directory',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.cake_rounded),
-              label: 'Birthdays',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.insights_rounded),
-              label: 'Overview',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outline_rounded),
-              label: 'Add',
-            ),
-          ],
         ),
       ),
     );
