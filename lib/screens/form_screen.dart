@@ -5,6 +5,7 @@ import '../models/month_names.dart';
 import '../models/person.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
+import '../widgets/app_chrome.dart';
 
 class FormScreen extends StatefulWidget {
   final Person? person;
@@ -133,7 +134,7 @@ class _FormScreenState extends State<FormScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Member'),
+        title: const Text('Delete Person'),
         content: Text(
           'Are you sure you want to delete ${widget.person!.name}?',
         ),
@@ -169,6 +170,8 @@ class _FormScreenState extends State<FormScreen> {
       appBar: AppBar(
         title: Text(isEditing ? 'Edit Person' : 'Add Person'),
         actions: [
+          const ThemeToggleButton(),
+          const SizedBox(width: 8),
           TextButton(
             onPressed: _save,
             child: const Text(
@@ -442,7 +445,7 @@ class _FormScreenState extends State<FormScreen> {
                       color: tokens.danger,
                     ),
                     label: Text(
-                      'Delete Member',
+                      'Delete Person',
                       style: TextStyle(color: tokens.danger),
                     ),
                     style: OutlinedButton.styleFrom(

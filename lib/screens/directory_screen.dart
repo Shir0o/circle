@@ -7,7 +7,9 @@ import '../theme/design_tokens.dart';
 import 'profile_screen.dart';
 
 class DirectoryScreen extends StatelessWidget {
-  const DirectoryScreen({super.key});
+  final ValueChanged<int>? onSwitchTab;
+
+  const DirectoryScreen({super.key, this.onSwitchTab});
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +160,7 @@ class DirectoryScreen extends StatelessWidget {
 
             const SizedBox(height: 8),
 
-            // Member List
+            // People List
             Expanded(
               child: people.isEmpty
                   ? Center(
@@ -172,7 +174,7 @@ class DirectoryScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'No members found',
+                            'No people found',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,

@@ -24,7 +24,7 @@ class CircleApp extends StatelessWidget {
       child: Consumer<PeopleProvider>(
         builder: (context, provider, child) {
           return MaterialApp(
-            title: 'Circle · Organization Member Tracking',
+            title: 'Circle',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,

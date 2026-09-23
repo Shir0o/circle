@@ -40,8 +40,8 @@ void main() {
     await tester.pumpWidget(CircleApp(clock: clock, prefs: prefs));
     await tester.pumpAndSettle();
 
-    expect(find.text('Circle'), findsOneWidget);
-    expect(find.text('No members found'), findsOneWidget);
+    expect(find.byKey(const Key('circle-tab-bar')), findsOneWidget);
+    expect(find.text('No people found'), findsOneWidget);
     expect(prefs.getString('circle_people_v1'), isNull);
   });
 

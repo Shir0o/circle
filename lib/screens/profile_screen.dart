@@ -5,6 +5,7 @@ import '../models/month_names.dart';
 import '../models/person.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
+import '../widgets/app_chrome.dart';
 import 'form_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -65,12 +66,14 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Member Profile'),
+        title: const Text('Profile'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
+          const ThemeToggleButton(),
+          const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.edit_rounded),
             onPressed: () {
