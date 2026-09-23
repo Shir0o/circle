@@ -128,7 +128,7 @@ void main() {
     expect(find.byKey(const Key('circle-tab-bar')), findsNothing);
 
     // Go back and open the Add form.
-    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.tap(find.byKey(const Key('profile-back')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
@@ -163,7 +163,7 @@ void main() {
     expect(find.byKey(const Key('theme-toggle')), findsOneWidget);
 
     // Back, then reachable on the form.
-    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.tap(find.byKey(const Key('profile-back')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
