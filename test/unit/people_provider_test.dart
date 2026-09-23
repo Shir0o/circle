@@ -109,8 +109,8 @@ void main() {
         'Diego Morales',
       ]);
       // July has two birthdays (Maya and Sofia).
-      expect(provider.overviewData['bdaysThisMonth'], 2);
-      expect(provider.overviewData['total'], 3);
+      expect(provider.overviewStats.birthdaysThisMonth, 2);
+      expect(provider.overviewStats.total, 3);
     });
   });
 
