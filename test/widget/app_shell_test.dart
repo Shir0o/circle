@@ -75,10 +75,7 @@ void main() {
 
     expect(dotDecoration(tester, 'birthdays').color, accent);
     expect(dotDecoration(tester, 'directory').color, Colors.transparent);
-    expect(
-      find.text('Upcoming celebrations across your circle'),
-      findsOneWidget,
-    );
+    expect(find.text('Next up in your circle'), findsOneWidget);
   });
 
   testWidgets('tapping Add opens the form and does not change the tab', (

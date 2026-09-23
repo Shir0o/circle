@@ -109,15 +109,12 @@ void main() {
       ],
     );
 
-    expect(find.text('Upcoming celebrations across your circle'), findsNothing);
+    expect(find.text('Next up in your circle'), findsNothing);
 
     await tester.tap(find.byKey(const Key('next-birthday-hint')));
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Upcoming celebrations across your circle'),
-      findsOneWidget,
-    );
+    expect(find.text('Next up in your circle'), findsOneWidget);
   });
 
   testWidgets('chips show dimmed counts and a dot only when inactive', (
