@@ -79,7 +79,47 @@ void main() {
       expect(personTomorrow.daysUntilBirthday(referenceDate: refDate), 1);
     });
 
+    group('Feb 29 leap-year handling', () {
+      final leap = Person(
+        id: 1,
+        name: 'Leap',
+        stage: LifeStage.working,
+        bMonth: 2,
+        bDay: 29,
+        bYear: 2000,
+      );
+
+      test('counts down to Feb 28 in a non-leap year', () {
+        // 2023 is not a leap year: the next celebration is Feb 28.
+        expect(leap.daysUntilBirthday(referenceDate: DateTime(2023, 2, 27)), 1);
+        expect(leap.daysUntilBirthday(referenceDate: DateTime(2023, 2, 28)), 0);
+      });
+
+      test('counts down to Feb 29 in a leap year', () {
+        // 2024 is a leap year: Feb 29 exists.
+        expect(leap.daysUntilBirthday(referenceDate: DateTime(2024, 2, 28)), 1);
+        expect(leap.daysUntilBirthday(referenceDate: DateTime(2024, 2, 29)), 0);
+      });
+
+      test('orders a Feb 29 birthday correctly in a non-leap year', () {
+        final feb28 = Person(
+          id: 2,
+          name: 'Feb28',
+          stage: LifeStage.working,
+          bMonth: 2,
+          bDay: 28,
+        );
+        // Reference Feb 27, 2023: both celebrate on Feb 28 (leap maps to Feb 28).
+        expect(
+          feb28.daysUntilBirthday(referenceDate: DateTime(2023, 2, 27)),
+          1,
+        );
+        expect(leap.daysUntilBirthday(referenceDate: DateTime(2023, 2, 27)), 1);
+      });
+    });
+
     test('subLine formatting per life stage', () {
+      final refDate = DateTime(2026, 7, 4);
       final collegePerson = Person(
         id: 1,
         name: 'Maya',
@@ -90,7 +130,10 @@ void main() {
         major: 'Psychology',
         school: 'UCLA',
       );
-      expect(collegePerson.subLine, 'Junior · Psychology · UCLA');
+      expect(
+        collegePerson.subLine(referenceDate: refDate),
+        'Junior · Psychology · UCLA',
+      );
 
       final workingPerson = Person(
         id: 2,
@@ -100,7 +143,10 @@ void main() {
         bDay: 14,
         occupation: 'Software Engineer',
       );
-      expect(workingPerson.subLine, 'Software Engineer');
+      expect(
+        workingPerson.subLine(referenceDate: refDate),
+        'Software Engineer',
+      );
 
       final childPerson = Person(
         id: 3,
@@ -111,7 +157,7 @@ void main() {
         bYear: 2016,
         grade: '4th grade',
       );
-      expect(childPerson.subLine, 'Age 9 · 4th grade');
+      expect(childPerson.subLine(referenceDate: refDate), 'Age 9 · 4th grade');
     });
 
     test('toJson and fromJson roundtrip', () {

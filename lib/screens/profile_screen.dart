@@ -26,19 +26,36 @@ class ProfileScreen extends StatelessWidget {
     final tokens = context.tokens;
     final meta = currentPerson.stage;
 
-    final age = currentPerson.getAge();
-    final bdayStr = '${monthNames[currentPerson.bMonth - 1]} ${currentPerson.bDay}${currentPerson.bYear != null ? ', ${currentPerson.bYear}' : ''}';
+    final age = currentPerson.getAge(referenceDate: provider.today);
+    final bdayStr =
+        '${monthNames[currentPerson.bMonth - 1]} ${currentPerson.bDay}${currentPerson.bYear != null ? ', ${currentPerson.bYear}' : ''}';
 
     final infoRows = <Map<String, String>>[];
     if (currentPerson.stage == LifeStage.college) {
-      if (currentPerson.year.isNotEmpty) infoRows.add({'label': 'Year', 'value': currentPerson.year});
-      if (currentPerson.major.isNotEmpty) infoRows.add({'label': 'Major', 'value': currentPerson.major});
-      if (currentPerson.school.isNotEmpty) infoRows.add({'label': 'College', 'value': currentPerson.school});
-    } else if (currentPerson.stage == LifeStage.teens || currentPerson.stage == LifeStage.kids) {
-      if (currentPerson.grade.isNotEmpty) infoRows.add({'label': 'Grade', 'value': currentPerson.grade});
-      if (currentPerson.school.isNotEmpty) infoRows.add({'label': 'School', 'value': currentPerson.school});
+      if (currentPerson.year.isNotEmpty) {
+        infoRows.add({'label': 'Year', 'value': currentPerson.year});
+      }
+      if (currentPerson.major.isNotEmpty) {
+        infoRows.add({'label': 'Major', 'value': currentPerson.major});
+      }
+      if (currentPerson.school.isNotEmpty) {
+        infoRows.add({'label': 'College', 'value': currentPerson.school});
+      }
+    } else if (currentPerson.stage == LifeStage.teens ||
+        currentPerson.stage == LifeStage.kids) {
+      if (currentPerson.grade.isNotEmpty) {
+        infoRows.add({'label': 'Grade', 'value': currentPerson.grade});
+      }
+      if (currentPerson.school.isNotEmpty) {
+        infoRows.add({'label': 'School', 'value': currentPerson.school});
+      }
     } else {
-      if (currentPerson.occupation.isNotEmpty) infoRows.add({'label': 'Occupation', 'value': currentPerson.occupation});
+      if (currentPerson.occupation.isNotEmpty) {
+        infoRows.add({
+          'label': 'Occupation',
+          'value': currentPerson.occupation,
+        });
+      }
     }
 
     infoRows.add({'label': 'Birthday', 'value': bdayStr});
@@ -99,7 +116,10 @@ class ProfileScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: meta.bg,
                           borderRadius: BorderRadius.circular(12),
@@ -115,10 +135,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       if (age != null) ...[
                         const SizedBox(width: 8),
-                        Text(
-                          '$age yrs',
-                          style: theme.textTheme.bodyMedium,
-                        ),
+                        Text('$age yrs', style: theme.textTheme.bodyMedium),
                       ],
                     ],
                   ),
@@ -147,14 +164,8 @@ class ProfileScreen extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            row['label']!,
-                            style: theme.textTheme.bodySmall,
-                          ),
-                          Text(
-                            row['value']!,
-                            style: theme.textTheme.bodyLarge,
-                          ),
+                          Text(row['label']!, style: theme.textTheme.bodySmall),
+                          Text(row['value']!, style: theme.textTheme.bodyLarge),
                         ],
                       ),
                     );
@@ -173,7 +184,10 @@ class ProfileScreen extends StatelessWidget {
                 runSpacing: 8,
                 children: currentPerson.interests.map((interest) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: tokens.tagWarmBg,
                       borderRadius: BorderRadius.circular(16),
@@ -201,7 +215,10 @@ class ProfileScreen extends StatelessWidget {
                 runSpacing: 8,
                 children: currentPerson.dietary.map((pref) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: tokens.tagMintBg,
                       borderRadius: BorderRadius.circular(16),

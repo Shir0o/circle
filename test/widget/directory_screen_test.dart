@@ -1,51 +1,95 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:circle/main.dart';
+import 'package:circle/models/clock.dart';
+import 'package:circle/models/life_stage.dart';
+import 'package:circle/models/person.dart';
 
 void main() {
-  setUp(() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  final clock = Clock(() => DateTime(2026, 7, 4));
+
+  Person person({
+    required int id,
+    required String name,
+    LifeStage stage = LifeStage.college,
+    int bMonth = 1,
+    int bDay = 1,
+  }) {
+    return Person(id: id, name: name, stage: stage, bMonth: bMonth, bDay: bDay);
+  }
+
+  Future<SharedPreferences> prefsWith(List<Person> people) async {
+    SharedPreferences.setMockInitialValues({
+      'circle_people_v1': jsonEncode(people.map((p) => p.toJson()).toList()),
+    });
+    return SharedPreferences.getInstance();
+  }
+
+  testWidgets('fresh install shows zero people and leaves storage untouched', (
+    WidgetTester tester,
+  ) async {
     SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(CircleApp(clock: clock, prefs: prefs));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Circle'), findsOneWidget);
+    expect(find.text('No members found'), findsOneWidget);
+    expect(prefs.getString('circle_people_v1'), isNull);
   });
 
-  testWidgets('CircleApp renders directory with seed members and allows search', (WidgetTester tester) async {
-    await tester.pumpWidget(const CircleApp());
+  testWidgets('renders stored fixtures and allows search', (
+    WidgetTester tester,
+  ) async {
+    final people = [
+      person(id: 1, name: 'Maya Chen', stage: LifeStage.college, bMonth: 3),
+      person(id: 2, name: 'Diego Morales', stage: LifeStage.working, bMonth: 4),
+    ];
+    final prefs = await prefsWith(people);
+
+    await tester.pumpWidget(CircleApp(clock: clock, prefs: prefs));
     await tester.pumpAndSettle();
 
-    // Verify App Bar Title
-    expect(find.text('Circle'), findsOneWidget);
-
-    // Verify Seed Members are rendered
-    expect(find.text('Aiden Park'), findsOneWidget);
+    expect(find.text('Maya Chen'), findsOneWidget);
     expect(find.text('Diego Morales'), findsOneWidget);
 
-    // Enter search text 'Aiden'
     final searchField = find.byType(TextField);
     expect(searchField, findsOneWidget);
-    await tester.enterText(searchField, 'Aiden');
+    await tester.enterText(searchField, 'Maya');
     await tester.pumpAndSettle();
 
-    // Aiden Park should still be visible, Diego Morales should not
-    expect(find.text('Aiden Park'), findsOneWidget);
+    expect(find.text('Maya Chen'), findsOneWidget);
     expect(find.text('Diego Morales'), findsNothing);
 
-    // Clear search
     await tester.enterText(searchField, '');
     await tester.pumpAndSettle();
     expect(find.text('Diego Morales'), findsOneWidget);
   });
 
-  testWidgets('Filter chips switch stage views correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(const CircleApp());
+  testWidgets('filter chips switch stage views correctly with fixtures', (
+    WidgetTester tester,
+  ) async {
+    final people = [
+      person(id: 1, name: 'Maya Chen', stage: LifeStage.college, bMonth: 3),
+      person(id: 2, name: 'Sofia Reyes', stage: LifeStage.kids, bMonth: 7),
+    ];
+    final prefs = await prefsWith(people);
+
+    await tester.pumpWidget(CircleApp(clock: clock, prefs: prefs));
     await tester.pumpAndSettle();
 
-    // Find and tap 'Kids' chip
-    final kidsChip = find.textContaining('Kids');
+    final kidsChip = find.text('Kids 1');
     expect(kidsChip, findsOneWidget);
     await tester.tap(kidsChip);
     await tester.pumpAndSettle();
 
-    // Sofia Reyes (child) should be shown, Maya Chen (college) should not
     expect(find.text('Sofia Reyes'), findsOneWidget);
     expect(find.text('Maya Chen'), findsNothing);
   });

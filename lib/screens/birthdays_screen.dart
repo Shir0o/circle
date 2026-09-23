@@ -51,10 +51,13 @@ class BirthdaysScreen extends StatelessWidget {
                         final days = entry.value;
 
                         final meta = person.stage;
-                        final turns = person.turnsAge();
+                        final turns = person.turnsAge(
+                          referenceDate: provider.today,
+                        );
                         final isSoon = days <= 30;
 
-                        final dateLine = '${monthNames[person.bMonth - 1]} ${person.bDay}${turns != null ? ' · turns $turns' : ''}';
+                        final dateLine =
+                            '${monthNames[person.bMonth - 1]} ${person.bDay}${turns != null ? ' · turns $turns' : ''}';
 
                         Color cardBg;
                         Color cardBorder;
@@ -62,7 +65,9 @@ class BirthdaysScreen extends StatelessWidget {
                           cardBg = tokens.accentSoft;
                           cardBorder = tokens.accentBorder;
                         } else {
-                          cardBg = theme.cardTheme.color ?? theme.colorScheme.surface;
+                          cardBg =
+                              theme.cardTheme.color ??
+                              theme.colorScheme.surface;
                           cardBorder = tokens.border;
                         }
 
@@ -104,7 +109,8 @@ class BirthdaysScreen extends StatelessWidget {
 
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           person.name,
@@ -121,7 +127,10 @@ class BirthdaysScreen extends StatelessWidget {
 
                                   // Days Counter Badge
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: isSoon
                                           ? theme.colorScheme.primary
@@ -141,12 +150,16 @@ class BirthdaysScreen extends StatelessWidget {
                                           ),
                                         ),
                                         Text(
-                                          days == 0 ? 'today' : (days == 1 ? 'day' : 'days'),
+                                          days == 0
+                                              ? 'today'
+                                              : (days == 1 ? 'day' : 'days'),
                                           style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w600,
                                             color: isSoon
-                                                ? Colors.white.withValues(alpha: 0.9)
+                                                ? Colors.white.withValues(
+                                                    alpha: 0.9,
+                                                  )
                                                 : tokens.muted,
                                           ),
                                         ),
