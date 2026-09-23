@@ -102,7 +102,7 @@ void main() {
     await tester.tap(find.byKey(const Key('form-cancel')));
     await tester.pumpAndSettle();
     expect(dotDecoration(tester, 'overview').color, accent);
-    expect(find.text('Insights & stats across your circle'), findsOneWidget);
+    expect(find.text('A quick look at everyone'), findsOneWidget);
   });
 
   testWidgets('tab bar is hidden on Profile and on the form', (

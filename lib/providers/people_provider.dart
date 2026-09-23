@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/clock.dart';
 import '../models/life_stage.dart';
+import '../models/overview_stats.dart';
 import '../models/person.dart';
 
 class PeopleProvider extends ChangeNotifier {
@@ -186,40 +187,6 @@ class PeopleProvider extends ChangeNotifier {
     return list;
   }
 
-  Map<String, dynamic> get overviewData {
-    final total = _people.length;
-    final today = _clock.today;
-    final bdaysThisMonth = _people.where((p) => p.bMonth == today.month).length;
-
-    final stageBars = LifeStage.values.map((stage) {
-      final count = _people.where((p) => p.stage == stage).length;
-      final pct = total > 0 ? (count / total * 100).round() : 0;
-      return {
-        'label': stage.label,
-        'count': count,
-        'color': stage.avatarBg,
-        'pct': '$pct%',
-      };
-    }).toList();
-
-    final locMap = <String, int>{};
-    for (final p in _people) {
-      if (p.location.isNotEmpty) {
-        locMap[p.location] = (locMap[p.location] ?? 0) + 1;
-      }
-    }
-    final sortedLocs = locMap.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final topLocations = sortedLocs
-        .take(5)
-        .map((e) => {'name': e.key, 'count': e.value})
-        .toList();
-
-    return {
-      'total': total,
-      'bdaysThisMonth': bdaysThisMonth,
-      'stageBars': stageBars,
-      'locations': topLocations,
-    };
-  }
+  OverviewStats get overviewStats =>
+      OverviewStats.fromPeople(_people, _clock.today);
 }
