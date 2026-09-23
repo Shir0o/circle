@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/people_provider.dart';
+import '../theme/design_tokens.dart';
 
 class OverviewScreen extends StatelessWidget {
   const OverviewScreen({super.key});
@@ -9,7 +10,7 @@ class OverviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<PeopleProvider>(context);
     final theme = Theme.of(context);
-    final isDark = provider.isDarkMode;
+    final tokens = context.tokens;
     final ov = provider.overviewData;
 
     final total = ov['total'] as int;
@@ -49,7 +50,7 @@ class OverviewScreen extends StatelessWidget {
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1.1,
-                                color: isDark ? const Color(0xFFA99C8C) : const Color(0xFF9A8F84),
+                                color: tokens.muted,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -79,7 +80,7 @@ class OverviewScreen extends StatelessWidget {
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1.1,
-                                color: isDark ? const Color(0xFFA99C8C) : const Color(0xFF9A8F84),
+                                color: tokens.muted,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -137,9 +138,7 @@ class OverviewScreen extends StatelessWidget {
                               child: LinearProgressIndicator(
                                 value: pctVal,
                                 minHeight: 10,
-                                backgroundColor: isDark
-                                    ? const Color(0xFF342A20)
-                                    : const Color(0xFFF3EADD),
+                                backgroundColor: tokens.track,
                                 valueColor: AlwaysStoppedAnimation<Color>(color),
                               ),
                             ),
@@ -182,9 +181,7 @@ class OverviewScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: isDark
-                                    ? const Color(0xFF342A20)
-                                    : const Color(0xFFF6EFE4),
+                                color: tokens.divider,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(

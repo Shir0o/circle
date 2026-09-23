@@ -1,16 +1,35 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:circle/models/person.dart';
+import 'package:circle/models/life_stage.dart';
 
 void main() {
   group('Person Model Tests', () {
     test('calculate initials correctly', () {
-      final person1 = Person(id: 1, name: 'Maya Chen', stage: 'college', bMonth: 3, bDay: 12);
+      final person1 = Person(
+        id: 1,
+        name: 'Maya Chen',
+        stage: LifeStage.college,
+        bMonth: 3,
+        bDay: 12,
+      );
       expect(person1.initials, 'MC');
 
-      final person2 = Person(id: 2, name: 'Jordan', stage: 'working', bMonth: 7, bDay: 8);
+      final person2 = Person(
+        id: 2,
+        name: 'Jordan',
+        stage: LifeStage.working,
+        bMonth: 7,
+        bDay: 8,
+      );
       expect(person2.initials, 'J');
 
-      final person3 = Person(id: 3, name: 'Sofia De La Cruz', stage: 'child', bMonth: 1, bDay: 1);
+      final person3 = Person(
+        id: 3,
+        name: 'Sofia De La Cruz',
+        stage: LifeStage.kids,
+        bMonth: 1,
+        bDay: 1,
+      );
       expect(person3.initials, 'SD');
     });
 
@@ -19,7 +38,7 @@ void main() {
       final person = Person(
         id: 1,
         name: 'Maya Chen',
-        stage: 'college',
+        stage: LifeStage.college,
         bMonth: 3,
         bDay: 12,
         bYear: 2004,
@@ -30,7 +49,7 @@ void main() {
       final person2 = Person(
         id: 2,
         name: 'Jordan Ellis',
-        stage: 'working',
+        stage: LifeStage.working,
         bMonth: 8,
         bDay: 10,
         bYear: 2000,
@@ -41,10 +60,22 @@ void main() {
 
     test('calculate days until birthday', () {
       final refDate = DateTime(2026, 7, 4);
-      final personToday = Person(id: 1, name: 'Maya', stage: 'college', bMonth: 7, bDay: 4);
+      final personToday = Person(
+        id: 1,
+        name: 'Maya',
+        stage: LifeStage.college,
+        bMonth: 7,
+        bDay: 4,
+      );
       expect(personToday.daysUntilBirthday(referenceDate: refDate), 0);
 
-      final personTomorrow = Person(id: 2, name: 'Sofia', stage: 'child', bMonth: 7, bDay: 5);
+      final personTomorrow = Person(
+        id: 2,
+        name: 'Sofia',
+        stage: LifeStage.kids,
+        bMonth: 7,
+        bDay: 5,
+      );
       expect(personTomorrow.daysUntilBirthday(referenceDate: refDate), 1);
     });
 
@@ -52,7 +83,7 @@ void main() {
       final collegePerson = Person(
         id: 1,
         name: 'Maya',
-        stage: 'college',
+        stage: LifeStage.college,
         bMonth: 3,
         bDay: 12,
         year: 'Junior',
@@ -64,7 +95,7 @@ void main() {
       final workingPerson = Person(
         id: 2,
         name: 'Noah',
-        stage: 'working',
+        stage: LifeStage.working,
         bMonth: 9,
         bDay: 14,
         occupation: 'Software Engineer',
@@ -74,7 +105,7 @@ void main() {
       final childPerson = Person(
         id: 3,
         name: 'Sofia',
-        stage: 'child',
+        stage: LifeStage.kids,
         bMonth: 7,
         bDay: 19,
         bYear: 2016,
@@ -87,7 +118,7 @@ void main() {
       final person = Person(
         id: 42,
         name: 'Test Member',
-        stage: 'teen',
+        stage: LifeStage.teens,
         bMonth: 11,
         bDay: 2,
         bYear: 2010,
@@ -113,6 +144,63 @@ void main() {
       expect(restored.interests, person.interests);
       expect(restored.dietary, person.dietary);
       expect(restored.notes, person.notes);
+    });
+  });
+
+  group('LifeStage', () {
+    test('serialises to existing storage strings', () {
+      expect(LifeStage.kids.serialized, 'child');
+      expect(LifeStage.teens.serialized, 'teen');
+      expect(LifeStage.college.serialized, 'college');
+      expect(LifeStage.working.serialized, 'working');
+    });
+
+    test('exposes the display labels', () {
+      expect(LifeStage.kids.label, 'Kids');
+      expect(LifeStage.teens.label, 'Teens');
+      expect(LifeStage.college.label, 'College');
+      expect(LifeStage.working.label, 'Working');
+    });
+
+    test('fromStorage resolves each known storage string', () {
+      expect(LifeStage.fromStorage('child'), LifeStage.kids);
+      expect(LifeStage.fromStorage('teen'), LifeStage.teens);
+      expect(LifeStage.fromStorage('college'), LifeStage.college);
+      expect(LifeStage.fromStorage('working'), LifeStage.working);
+    });
+
+    test('fromStorage falls back to College for unknown values', () {
+      expect(LifeStage.fromStorage('alien'), LifeStage.college);
+      expect(LifeStage.fromStorage(''), LifeStage.college);
+      expect(LifeStage.fromStorage(null), LifeStage.college);
+    });
+
+    test(
+      'round-trips through toJson and fromJson keeping the same stage string',
+      () {
+        final person = Person(
+          id: 1,
+          name: 'Test',
+          stage: LifeStage.kids,
+          bMonth: 1,
+          bDay: 1,
+        );
+        final json = person.toJson();
+        expect(json['stage'], 'child');
+        final restored = Person.fromJson(json);
+        expect(restored.stage, LifeStage.kids);
+      },
+    );
+
+    test('fromJson falls back to College for unknown stored stage', () {
+      final restored = Person.fromJson({
+        'id': 1,
+        'name': 'Test',
+        'stage': 'alien',
+        'bMonth': 1,
+        'bDay': 1,
+      });
+      expect(restored.stage, LifeStage.college);
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/life_stage.dart';
 import '../models/person.dart';
 
 class PeopleProvider extends ChangeNotifier {
@@ -109,7 +110,7 @@ class PeopleProvider extends ChangeNotifier {
     final q = _searchQuery.trim().toLowerCase();
     final filter = _stageFilter;
     final list = _people.where((p) {
-      final matchesStage = (filter == 'all' || p.stage == filter);
+      final matchesStage = (filter == 'all' || p.stage.serialized == filter);
       final matchesQuery = q.isEmpty || p.name.toLowerCase().contains(q);
       return matchesStage && matchesQuery;
     }).toList();
@@ -120,8 +121,8 @@ class PeopleProvider extends ChangeNotifier {
 
   Map<String, int> get stageCounts {
     final counts = <String, int>{'all': _people.length};
-    for (final stage in ['child', 'teen', 'college', 'working']) {
-      counts[stage] = _people.where((p) => p.stage == stage).length;
+    for (final stage in LifeStage.values) {
+      counts[stage.serialized] = _people.where((p) => p.stage == stage).length;
     }
     return counts;
   }
@@ -159,23 +160,13 @@ class PeopleProvider extends ChangeNotifier {
     final referenceDate = DateTime(2026, 7, 4); // Jul 4 2026 baseline from spec
     final bdaysThisMonth = _people.where((p) => p.bMonth == referenceDate.month).length;
 
-    final stageDefs = [
-      ['child', 'Kids'],
-      ['teen', 'Teens'],
-      ['college', 'College'],
-      ['working', 'Working'],
-    ];
-
-    final stageBars = stageDefs.map((def) {
-      final s = def[0];
-      final label = def[1];
-      final count = _people.where((p) => p.stage == s).length;
+    final stageBars = LifeStage.values.map((stage) {
+      final count = _people.where((p) => p.stage == stage).length;
       final pct = total > 0 ? (count / total * 100).round() : 0;
-      final meta = Person.getStageMeta(s);
       return {
-        'label': label,
+        'label': stage.label,
         'count': count,
-        'color': meta.avatarBg,
+        'color': stage.avatarBg,
         'pct': '$pct%',
       };
     }).toList();
@@ -203,7 +194,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 1,
         name: 'Maya Chen',
-        stage: 'college',
+        stage: LifeStage.college,
         bMonth: 3,
         bDay: 12,
         bYear: 2004,
@@ -219,7 +210,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 2,
         name: 'Jordan Ellis',
-        stage: 'working',
+        stage: LifeStage.working,
         bMonth: 7,
         bDay: 8,
         bYear: 2001,
@@ -233,7 +224,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 3,
         name: 'Liam Okafor',
-        stage: 'teen',
+        stage: LifeStage.teens,
         bMonth: 11,
         bDay: 2,
         bYear: 2010,
@@ -247,7 +238,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 4,
         name: 'Sofia Reyes',
-        stage: 'child',
+        stage: LifeStage.kids,
         bMonth: 7,
         bDay: 19,
         bYear: 2016,
@@ -261,7 +252,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 5,
         name: 'Aiden Park',
-        stage: 'college',
+        stage: LifeStage.college,
         bMonth: 2,
         bDay: 27,
         bYear: 2003,
@@ -276,7 +267,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 6,
         name: 'Noah Kim',
-        stage: 'working',
+        stage: LifeStage.working,
         bMonth: 9,
         bDay: 14,
         bYear: 1998,
@@ -290,7 +281,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 7,
         name: 'Emma Wallace',
-        stage: 'teen',
+        stage: LifeStage.teens,
         bMonth: 7,
         bDay: 22,
         bYear: 2012,
@@ -305,7 +296,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 8,
         name: 'Zara Ahmed',
-        stage: 'college',
+        stage: LifeStage.college,
         bMonth: 12,
         bDay: 5,
         bYear: 2005,
@@ -321,7 +312,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 9,
         name: 'Diego Morales',
-        stage: 'working',
+        stage: LifeStage.working,
         bMonth: 4,
         bDay: 3,
         bYear: 1995,
@@ -334,7 +325,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 10,
         name: 'Lily Nguyen',
-        stage: 'child',
+        stage: LifeStage.kids,
         bMonth: 1,
         bDay: 30,
         bYear: 2018,
@@ -348,7 +339,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 11,
         name: 'Ethan Brooks',
-        stage: 'working',
+        stage: LifeStage.working,
         bMonth: 8,
         bDay: 11,
         bYear: 1999,
@@ -362,7 +353,7 @@ class PeopleProvider extends ChangeNotifier {
       Person(
         id: 12,
         name: 'Priya Patel',
-        stage: 'college',
+        stage: LifeStage.college,
         bMonth: 10,
         bDay: 9,
         bYear: 2006,

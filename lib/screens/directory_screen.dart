@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/person.dart';
+import '../models/life_stage.dart';
+import '../models/month_names.dart';
 import '../providers/people_provider.dart';
+import '../theme/design_tokens.dart';
 import 'profile_screen.dart';
 
 class DirectoryScreen extends StatelessWidget {
@@ -11,7 +13,7 @@ class DirectoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<PeopleProvider>(context);
     final theme = Theme.of(context);
-    final isDark = provider.isDarkMode;
+    final tokens = context.tokens;
     final people = provider.filteredPeople;
     final counts = provider.stageCounts;
     final activeFilter = provider.stageFilter;
@@ -37,7 +39,7 @@ class DirectoryScreen extends StatelessWidget {
                   hintText: 'Search people...',
                   prefixIcon: Icon(
                     Icons.search_rounded,
-                    color: isDark ? const Color(0xFFA99C8C) : const Color(0xFF9A8F84),
+                    color: tokens.muted,
                   ),
                   suffixIcon: provider.searchQuery.isNotEmpty
                       ? IconButton(
@@ -68,14 +70,14 @@ class DirectoryScreen extends StatelessWidget {
                     if (key == 'all') {
                       chipBg = theme.colorScheme.primary;
                     } else {
-                      chipBg = Person.getStageMeta(key).avatarBg;
+                      chipBg = LifeStage.fromStorage(key).avatarBg;
                     }
                     chipText = Colors.white;
                     chipBorder = chipBg;
                   } else {
                     chipBg = theme.cardTheme.color ?? theme.colorScheme.surface;
-                    chipText = isDark ? const Color(0xFFC9BDAD) : const Color(0xFF6B5F52);
-                    chipBorder = isDark ? const Color(0xFF382D22) : const Color(0xFFEFE5D7);
+                    chipText = tokens.chipText;
+                    chipBorder = tokens.chipBorder;
                   }
 
                   return Padding(
@@ -97,7 +99,7 @@ class DirectoryScreen extends StatelessWidget {
                                 width: 8,
                                 height: 8,
                                 decoration: BoxDecoration(
-                                  color: Person.getStageMeta(key).avatarBg,
+                                  color: LifeStage.fromStorage(key).avatarBg,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -127,10 +129,10 @@ class DirectoryScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0x1AFF6B4A) : const Color(0xFFFFF6F2),
+                  color: tokens.accentSoft,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: isDark ? const Color(0x52FF6B4A) : const Color(0xFFFFD9CC),
+                    color: tokens.accentBorder,
                   ),
                 ),
                 child: Row(
@@ -165,7 +167,7 @@ class DirectoryScreen extends StatelessWidget {
                           Icon(
                             Icons.people_outline_rounded,
                             size: 48,
-                            color: isDark ? const Color(0xFF6E6355) : const Color(0xFFBAAE9F),
+                            color: tokens.faint,
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -173,7 +175,7 @@ class DirectoryScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: isDark ? const Color(0xFFA99C8C) : const Color(0xFF9A8F84),
+                              color: tokens.muted,
                             ),
                           ),
                         ],
@@ -184,12 +186,8 @@ class DirectoryScreen extends StatelessWidget {
                       itemCount: people.length,
                       itemBuilder: (context, index) {
                         final person = people[index];
-                        final meta = Person.getStageMeta(person.stage);
-                        final months = [
-                          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-                        ];
-                        final bdayStr = '${months[person.bMonth - 1]} ${person.bDay}';
+                        final meta = person.stage;
+                        final bdayStr = '${monthNames[person.bMonth - 1]} ${person.bDay}';
                         final metaLine = [if (person.location.isNotEmpty) person.location, bdayStr].join(' · ');
 
                         return Card(
@@ -278,7 +276,7 @@ class DirectoryScreen extends StatelessWidget {
 
                                   Icon(
                                     Icons.chevron_right_rounded,
-                                    color: isDark ? const Color(0xFF5A5044) : const Color(0xFFD8CDBF),
+                                    color: tokens.chevron,
                                   ),
                                 ],
                               ),

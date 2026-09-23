@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/person.dart';
+import '../models/month_names.dart';
 import '../providers/people_provider.dart';
+import '../theme/design_tokens.dart';
 import 'profile_screen.dart';
 
 class BirthdaysScreen extends StatelessWidget {
@@ -11,13 +12,8 @@ class BirthdaysScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<PeopleProvider>(context);
     final theme = Theme.of(context);
-    final isDark = provider.isDarkMode;
+    final tokens = context.tokens;
     final upcomingList = provider.upcomingBirthdays;
-
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
 
     return Scaffold(
       body: SafeArea(
@@ -54,20 +50,20 @@ class BirthdaysScreen extends StatelessWidget {
                         final person = entry.key;
                         final days = entry.value;
 
-                        final meta = Person.getStageMeta(person.stage);
+                        final meta = person.stage;
                         final turns = person.turnsAge();
                         final isSoon = days <= 30;
 
-                        final dateLine = '${months[person.bMonth - 1]} ${person.bDay}${turns != null ? ' · turns $turns' : ''}';
+                        final dateLine = '${monthNames[person.bMonth - 1]} ${person.bDay}${turns != null ? ' · turns $turns' : ''}';
 
                         Color cardBg;
                         Color cardBorder;
                         if (isSoon) {
-                          cardBg = isDark ? const Color(0x29FF6B4A) : const Color(0xFFFFF6F2);
-                          cardBorder = isDark ? const Color(0x52FF6B4A) : const Color(0xFFFFD9CC);
+                          cardBg = tokens.accentSoft;
+                          cardBorder = tokens.accentBorder;
                         } else {
                           cardBg = theme.cardTheme.color ?? theme.colorScheme.surface;
-                          cardBorder = isDark ? const Color(0xFF342A20) : const Color(0xFFF2EADF);
+                          cardBorder = tokens.border;
                         }
 
                         return Container(
@@ -129,7 +125,7 @@ class BirthdaysScreen extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       color: isSoon
                                           ? theme.colorScheme.primary
-                                          : (isDark ? const Color(0xFF342A20) : const Color(0xFFF6EFE4)),
+                                          : tokens.divider,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Column(
@@ -141,7 +137,7 @@ class BirthdaysScreen extends StatelessWidget {
                                             fontWeight: FontWeight.w800,
                                             color: isSoon
                                                 ? Colors.white
-                                                : (isDark ? const Color(0xFFF4EEE4) : const Color(0xFF2B2622)),
+                                                : tokens.text,
                                           ),
                                         ),
                                         Text(
@@ -151,7 +147,7 @@ class BirthdaysScreen extends StatelessWidget {
                                             fontWeight: FontWeight.w600,
                                             color: isSoon
                                                 ? Colors.white.withValues(alpha: 0.9)
-                                                : (isDark ? const Color(0xFFA99C8C) : const Color(0xFF9A8F84)),
+                                                : tokens.muted,
                                           ),
                                         ),
                                       ],

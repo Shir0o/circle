@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/life_stage.dart';
+import '../models/month_names.dart';
 import '../models/person.dart';
 import '../providers/people_provider.dart';
+import '../theme/design_tokens.dart';
 import 'form_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -13,7 +16,6 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<PeopleProvider>(context);
     final theme = Theme.of(context);
-    final isDark = provider.isDarkMode;
 
     // Refresh person from provider state in case it was edited
     final currentPerson = provider.people.firstWhere(
@@ -21,21 +23,18 @@ class ProfileScreen extends StatelessWidget {
       orElse: () => person,
     );
 
-    final meta = Person.getStageMeta(currentPerson.stage);
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
+    final tokens = context.tokens;
+    final meta = currentPerson.stage;
 
     final age = currentPerson.getAge();
-    final bdayStr = '${months[currentPerson.bMonth - 1]} ${currentPerson.bDay}${currentPerson.bYear != null ? ', ${currentPerson.bYear}' : ''}';
+    final bdayStr = '${monthNames[currentPerson.bMonth - 1]} ${currentPerson.bDay}${currentPerson.bYear != null ? ', ${currentPerson.bYear}' : ''}';
 
     final infoRows = <Map<String, String>>[];
-    if (currentPerson.stage == 'college') {
+    if (currentPerson.stage == LifeStage.college) {
       if (currentPerson.year.isNotEmpty) infoRows.add({'label': 'Year', 'value': currentPerson.year});
       if (currentPerson.major.isNotEmpty) infoRows.add({'label': 'Major', 'value': currentPerson.major});
       if (currentPerson.school.isNotEmpty) infoRows.add({'label': 'College', 'value': currentPerson.school});
-    } else if (currentPerson.stage == 'teen' || currentPerson.stage == 'child') {
+    } else if (currentPerson.stage == LifeStage.teens || currentPerson.stage == LifeStage.kids) {
       if (currentPerson.grade.isNotEmpty) infoRows.add({'label': 'Grade', 'value': currentPerson.grade});
       if (currentPerson.school.isNotEmpty) infoRows.add({'label': 'School', 'value': currentPerson.school});
     } else {
@@ -176,18 +175,15 @@ class ProfileScreen extends StatelessWidget {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF2C231B) : const Color(0xFFF6EFE4),
+                      color: tokens.tagWarmBg,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDark ? const Color(0xFF382D22) : const Color(0xFFEFE5D7),
-                      ),
                     ),
                     child: Text(
                       interest,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? const Color(0xFFD6CDC0) : const Color(0xFF4A443C),
+                        color: tokens.tagWarmText,
                       ),
                     ),
                   );
@@ -207,18 +203,15 @@ class ProfileScreen extends StatelessWidget {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0x26F5B700) : const Color(0xFFFFF1D9),
+                      color: tokens.tagMintBg,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDark ? const Color(0x52F5B700) : const Color(0xFFFFE0B2),
-                      ),
                     ),
                     child: Text(
                       pref,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? const Color(0xFFF0C24A) : const Color(0xFF9A6B00),
+                        color: tokens.tagMintText,
                       ),
                     ),
                   );
