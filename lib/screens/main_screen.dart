@@ -52,7 +52,10 @@ class _MainScreenState extends State<MainScreen> {
                 child: IndexedStack(
                   index: _currentIndex,
                   children: [
-                    DirectoryScreen(onSwitchTab: _switchTab),
+                    DirectoryScreen(
+                      onSwitchTab: _switchTab,
+                      onOpenAdd: _openAdd,
+                    ),
                     const BirthdaysScreen(),
                     const OverviewScreen(),
                   ],
