@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/people_provider.dart';
+import '../theme/design_tokens.dart';
 import 'directory_screen.dart';
 import 'birthdays_screen.dart';
 import 'overview_screen.dart';
@@ -26,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<PeopleProvider>(context);
     final theme = Theme.of(context);
-    final isDark = provider.isDarkMode;
+    final tokens = context.tokens;
 
     return Scaffold(
       appBar: AppBar(
@@ -54,7 +55,7 @@ class _MainScreenState extends State<MainScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              isDark ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+              provider.isDarkMode ? Icons.wb_sunny_rounded : Icons.nightlight_round,
             ),
             tooltip: 'Toggle Theme',
             onPressed: () => provider.toggleTheme(),
@@ -83,7 +84,7 @@ class _MainScreenState extends State<MainScreen> {
           color: theme.cardTheme.color,
           border: Border(
             top: BorderSide(
-              color: isDark ? const Color(0xFF2C231B) : const Color(0xFFF6EFE4),
+              color: tokens.divider,
               width: 1,
             ),
           ),
@@ -105,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedItemColor: theme.colorScheme.primary,
-          unselectedItemColor: isDark ? const Color(0xFF8A7D6E) : const Color(0xFFB4A99C),
+          unselectedItemColor: tokens.tabInactive,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           type: BottomNavigationBarType.fixed,

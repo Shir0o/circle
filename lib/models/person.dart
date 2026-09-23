@@ -1,25 +1,9 @@
-import 'package:flutter/material.dart';
-
-class StageMeta {
-  final String label;
-  final Color bg;
-  final Color color;
-  final Color avatarBg;
-  final Color avatarColor;
-
-  const StageMeta({
-    required this.label,
-    required this.bg,
-    required this.color,
-    required this.avatarBg,
-    required this.avatarColor,
-  });
-}
+import 'life_stage.dart';
 
 class Person {
   final int id;
   final String name;
-  final String stage; // 'child', 'teen', 'college', 'working'
+  final LifeStage stage;
   final int bMonth;
   final int bDay;
   final int? bYear;
@@ -54,7 +38,11 @@ class Person {
   });
 
   String get initials {
-    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final words = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
     if (words.isEmpty) return '?';
     if (words.length == 1) return words[0][0].toUpperCase();
     return (words[0][0] + words[1][0]).toUpperCase();
@@ -83,63 +71,35 @@ class Person {
   int? turnsAge({DateTime? referenceDate}) {
     if (bYear == null) return null;
     final today = referenceDate ?? DateTime(2026, 7, 4);
-    final turnYear = (bMonth > today.month || (bMonth == today.month && bDay >= today.day)) ? today.year : today.year + 1;
+    final turnYear =
+        (bMonth > today.month || (bMonth == today.month && bDay >= today.day))
+        ? today.year
+        : today.year + 1;
     return turnYear - bYear!;
   }
 
   String get subLine {
-    if (stage == 'child') {
+    if (stage == LifeStage.kids) {
       final a = getAge();
       final parts = <String>[];
       if (a != null) parts.add('Age $a');
       if (grade.isNotEmpty) parts.add(grade);
       return parts.join(' · ');
-    } else if (stage == 'teen') {
-      final parts = [if (grade.isNotEmpty) grade, if (school.isNotEmpty) school];
+    } else if (stage == LifeStage.teens) {
+      final parts = [
+        if (grade.isNotEmpty) grade,
+        if (school.isNotEmpty) school,
+      ];
       return parts.join(' · ');
-    } else if (stage == 'college') {
-      final parts = [if (year.isNotEmpty) year, if (major.isNotEmpty) major, if (school.isNotEmpty) school];
+    } else if (stage == LifeStage.college) {
+      final parts = [
+        if (year.isNotEmpty) year,
+        if (major.isNotEmpty) major,
+        if (school.isNotEmpty) school,
+      ];
       return parts.join(' · ');
     } else {
       return occupation.isNotEmpty ? occupation : 'Working';
-    }
-  }
-
-  static StageMeta getStageMeta(String stage) {
-    switch (stage) {
-      case 'child':
-        return const StageMeta(
-          label: 'Kids',
-          bg: Color(0xFFFEF1CF),
-          color: Color(0xFFB27A00),
-          avatarBg: Color(0xFFF5B700),
-          avatarColor: Color(0xFF3A2C00),
-        );
-      case 'teen':
-        return const StageMeta(
-          label: 'Teens',
-          bg: Color(0xFFFFE0EC),
-          color: Color(0xFFC13567),
-          avatarBg: Color(0xFFFF5D8F),
-          avatarColor: Color(0xFF4A0A22),
-        );
-      case 'college':
-        return const StageMeta(
-          label: 'College',
-          bg: Color(0xFFECE6FF),
-          color: Color(0xFF5B3EDA),
-          avatarBg: Color(0xFF7C5CFC),
-          avatarColor: Color(0xFF1E1147),
-        );
-      case 'working':
-      default:
-        return const StageMeta(
-          label: 'Working',
-          bg: Color(0xFFD6F5EA),
-          color: Color(0xFF0B7A56),
-          avatarBg: Color(0xFF12B981),
-          avatarColor: Color(0xFF04331F),
-        );
     }
   }
 
@@ -147,7 +107,7 @@ class Person {
     return {
       'id': id,
       'name': name,
-      'stage': stage,
+      'stage': stage.serialized,
       'bMonth': bMonth,
       'bDay': bDay,
       'bYear': bYear,
@@ -168,7 +128,7 @@ class Person {
     return Person(
       id: json['id'] as int,
       name: json['name'] as String? ?? '',
-      stage: json['stage'] as String? ?? 'college',
+      stage: LifeStage.fromStorage(json['stage'] as String?),
       bMonth: json['bMonth'] as int? ?? 1,
       bDay: json['bDay'] as int? ?? 1,
       bYear: json['bYear'] as int?,
@@ -178,8 +138,16 @@ class Person {
       grade: json['grade'] as String? ?? '',
       occupation: json['occupation'] as String? ?? '',
       location: json['location'] as String? ?? '',
-      interests: (json['interests'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      dietary: (json['dietary'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      interests:
+          (json['interests'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      dietary:
+          (json['dietary'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       howKnow: json['howKnow'] as String? ?? '',
       notes: json['notes'] as String? ?? '',
     );
@@ -188,7 +156,7 @@ class Person {
   Person copyWith({
     int? id,
     String? name,
-    String? stage,
+    LifeStage? stage,
     int? bMonth,
     int? bDay,
     int? bYear,
