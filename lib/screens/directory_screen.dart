@@ -37,10 +37,7 @@ class DirectoryScreen extends StatelessWidget {
                 onChanged: (val) => provider.setSearchQuery(val),
                 decoration: InputDecoration(
                   hintText: 'Search people...',
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    color: tokens.muted,
-                  ),
+                  prefixIcon: Icon(Icons.search_rounded, color: tokens.muted),
                   suffixIcon: provider.searchQuery.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear_rounded, size: 18),
@@ -86,7 +83,10 @@ class DirectoryScreen extends StatelessWidget {
                       onTap: () => provider.setStageFilter(key),
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: chipBg,
                           borderRadius: BorderRadius.circular(20),
@@ -127,13 +127,14 @@ class DirectoryScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: tokens.accentSoft,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: tokens.accentBorder,
-                  ),
+                  border: Border.all(color: tokens.accentBorder),
                 ),
                 child: Row(
                   children: [
@@ -187,8 +188,12 @@ class DirectoryScreen extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final person = people[index];
                         final meta = person.stage;
-                        final bdayStr = '${monthNames[person.bMonth - 1]} ${person.bDay}';
-                        final metaLine = [if (person.location.isNotEmpty) person.location, bdayStr].join(' · ');
+                        final bdayStr =
+                            '${monthNames[person.bMonth - 1]} ${person.bDay}';
+                        final metaLine = [
+                          if (person.location.isNotEmpty) person.location,
+                          bdayStr,
+                        ].join(' · ');
 
                         return Card(
                           margin: const EdgeInsets.only(bottom: 10),
@@ -225,26 +230,30 @@ class DirectoryScreen extends StatelessWidget {
                                   // Details
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
                                             Flexible(
                                               child: Text(
                                                 person.name,
-                                                style: theme.textTheme.titleMedium,
+                                                style:
+                                                    theme.textTheme.titleMedium,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                             const SizedBox(width: 8),
                                             Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 2,
-                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 2,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: meta.bg,
-                                                borderRadius: BorderRadius.circular(8),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
                                               ),
                                               child: Text(
                                                 meta.label,
@@ -258,9 +267,15 @@ class DirectoryScreen extends StatelessWidget {
                                           ],
                                         ),
                                         const SizedBox(height: 2),
-                                        if (person.subLine.isNotEmpty)
+                                        if (person
+                                            .subLine(
+                                              referenceDate: provider.today,
+                                            )
+                                            .isNotEmpty)
                                           Text(
-                                            person.subLine,
+                                            person.subLine(
+                                              referenceDate: provider.today,
+                                            ),
                                             style: theme.textTheme.bodyMedium,
                                             overflow: TextOverflow.ellipsis,
                                           ),

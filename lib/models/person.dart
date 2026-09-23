@@ -48,39 +48,54 @@ class Person {
     return (words[0][0] + words[1][0]).toUpperCase();
   }
 
-  int? getAge({DateTime? referenceDate}) {
+  int? getAge({required DateTime referenceDate}) {
     if (bYear == null) return null;
-    final today = referenceDate ?? DateTime(2026, 7, 4);
-    int age = today.year - bYear!;
-    if (today.month < bMonth || (today.month == bMonth && today.day < bDay)) {
+    int age = referenceDate.year - bYear!;
+    if (referenceDate.month < bMonth ||
+        (referenceDate.month == bMonth && referenceDate.day < bDay)) {
       age--;
     }
     return age;
   }
 
-  int daysUntilBirthday({DateTime? referenceDate}) {
-    final today = referenceDate ?? DateTime(2026, 7, 4);
-    final todayDateOnly = DateTime(today.year, today.month, today.day);
-    var next = DateTime(today.year, bMonth, bDay);
-    if (next.isBefore(todayDateOnly)) {
-      next = DateTime(today.year + 1, bMonth, bDay);
+  int daysUntilBirthday({required DateTime referenceDate}) {
+    final today = DateTime(
+      referenceDate.year,
+      referenceDate.month,
+      referenceDate.day,
+    );
+    var next = _birthdayInYear(today.year);
+    if (next.isBefore(today)) {
+      next = _birthdayInYear(today.year + 1);
     }
-    return next.difference(todayDateOnly).inDays;
+    return next.difference(today).inDays;
   }
 
-  int? turnsAge({DateTime? referenceDate}) {
+  int? turnsAge({required DateTime referenceDate}) {
     if (bYear == null) return null;
-    final today = referenceDate ?? DateTime(2026, 7, 4);
     final turnYear =
-        (bMonth > today.month || (bMonth == today.month && bDay >= today.day))
-        ? today.year
-        : today.year + 1;
+        (bMonth > referenceDate.month ||
+            (bMonth == referenceDate.month && bDay >= referenceDate.day))
+        ? referenceDate.year
+        : referenceDate.year + 1;
     return turnYear - bYear!;
   }
 
-  String get subLine {
+  /// The date of this person's birthday within [year], mapping Feb 29 to
+  /// Feb 28 in non-leap years so countdowns and ordering stay correct.
+  DateTime _birthdayInYear(int year) {
+    if (bMonth == 2 && bDay == 29 && !_isLeapYear(year)) {
+      return DateTime(year, 2, 28);
+    }
+    return DateTime(year, bMonth, bDay);
+  }
+
+  static bool _isLeapYear(int year) =>
+      (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+
+  String subLine({required DateTime referenceDate}) {
     if (stage == LifeStage.kids) {
-      final a = getAge();
+      final a = getAge(referenceDate: referenceDate);
       final parts = <String>[];
       if (a != null) parts.add('Age $a');
       if (grade.isNotEmpty) parts.add(grade);
