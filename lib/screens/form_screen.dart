@@ -6,6 +6,7 @@ import '../models/person.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
 import '../widgets/app_chrome.dart';
+import 'profile_screen.dart';
 
 class FormScreen extends StatefulWidget {
   final Person? person;
@@ -143,7 +144,14 @@ class _FormScreenState extends State<FormScreen> {
     );
 
     provider.savePerson(person);
-    Navigator.pop(context);
+    if (widget.person == null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => ProfileScreen(person: person)),
+      );
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   void _delete() {
@@ -168,7 +176,9 @@ class _FormScreenState extends State<FormScreen> {
               );
               provider.deletePerson(widget.person!.id);
               Navigator.pop(ctx); // Close dialog
-              Navigator.pop(context); // Close profile/form screen
+              // Pop any profile/form routes above the shell so the deleted
+              // person's profile is not left on the navigation stack.
+              Navigator.popUntil(context, (route) => route.isFirst);
             },
             child: Text('Delete', style: TextStyle(color: ctx.tokens.danger)),
           ),
@@ -376,6 +386,7 @@ class _FormScreenState extends State<FormScreen> {
     required String hint,
     TextInputType? keyboardType,
     int maxLines = 1,
+    FormFieldValidator<String>? validator,
   }) {
     final tokens = context.tokens;
     return TextFormField(
@@ -383,6 +394,7 @@ class _FormScreenState extends State<FormScreen> {
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      validator: validator,
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
@@ -401,6 +413,11 @@ class _FormScreenState extends State<FormScreen> {
           fontWeight: FontWeight.w500,
           color: tokens.faint,
         ),
+        errorStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: tokens.danger,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
           borderSide: BorderSide(color: tokens.inputBorder),
@@ -412,6 +429,14 @@ class _FormScreenState extends State<FormScreen> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
           borderSide: BorderSide(color: tokens.accent, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.danger, width: 1.5),
         ),
       ),
     );
@@ -441,6 +466,11 @@ class _FormScreenState extends State<FormScreen> {
           fontWeight: FontWeight.w500,
           color: tokens.faint,
         ),
+        errorStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: tokens.danger,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
           borderSide: BorderSide(color: tokens.inputBorder),
@@ -452,6 +482,14 @@ class _FormScreenState extends State<FormScreen> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
           borderSide: BorderSide(color: tokens.accent, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.danger, width: 1.5),
         ),
       ),
     );
@@ -547,6 +585,7 @@ class _FormScreenState extends State<FormScreen> {
             controller: _bDayController,
             hint: 'Day',
             keyboardType: TextInputType.number,
+            validator: _validateDay,
           ),
         ),
         const SizedBox(width: 8),
@@ -557,11 +596,47 @@ class _FormScreenState extends State<FormScreen> {
             controller: _bYearController,
             hint: 'Year',
             keyboardType: TextInputType.number,
+            validator: _validateYear,
           ),
         ),
       ],
     );
   }
+
+  String? _validateDay(String? val) {
+    final text = val?.trim() ?? '';
+    if (text.isEmpty) return 'Day is required';
+    final day = int.tryParse(text);
+    if (day == null) return 'Day must be a number';
+    final yearText = _bYearController.text.trim();
+    final year = yearText.isEmpty ? null : int.tryParse(yearText);
+    if (day < 1 || day > _daysInMonth(_bMonth, year)) {
+      return 'Invalid day for this month';
+    }
+    return null;
+  }
+
+  String? _validateYear(String? val) {
+    final text = val?.trim() ?? '';
+    if (text.isEmpty) return null;
+    final year = int.tryParse(text);
+    if (year == null) return 'Year must be a number';
+    final today = Provider.of<PeopleProvider>(context, listen: false).today;
+    if (year > today.year) return 'Year can\'t be in the future';
+    return null;
+  }
+
+  static int _daysInMonth(int month, int? year) {
+    if (month == 2) {
+      final y = year ?? 2001; // non-leap default when the year is unknown
+      return _isLeapYear(y) ? 29 : 28;
+    }
+    const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return days[month - 1];
+  }
+
+  static bool _isLeapYear(int year) =>
+      (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
 
   List<Widget> _stageSpecificFields(DesignTokens tokens) {
     switch (_stage) {
