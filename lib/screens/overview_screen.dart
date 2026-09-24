@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/overview_stats.dart';
 import '../providers/people_provider.dart';
@@ -15,8 +16,14 @@ class OverviewScreen extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(22, 10, 22, 24),
+          padding: EdgeInsets.fromLTRB(
+            22,
+            10,
+            22,
+            24 + MediaQuery.paddingOf(context).bottom,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -69,10 +76,10 @@ class OverviewScreen extends StatelessWidget {
       children: [
         Text(
           'Your circle',
-          style: TextStyle(
-            fontSize: 27,
+          style: GoogleFonts.nunito(
+            fontSize: 24,
             fontWeight: FontWeight.w900,
-            letterSpacing: -0.02,
+            letterSpacing: -0.48,
             color: tokens.text,
             height: 1,
           ),
@@ -80,7 +87,7 @@ class OverviewScreen extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'A quick look at everyone',
-          style: TextStyle(
+          style: GoogleFonts.nunito(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: tokens.muted,
@@ -114,7 +121,7 @@ class OverviewScreen extends StatelessWidget {
           Text(
             value,
             key: valueKey,
-            style: TextStyle(
+            style: GoogleFonts.nunito(
               fontSize: 30,
               fontWeight: FontWeight.w900,
               color: valueColor,
@@ -124,7 +131,7 @@ class OverviewScreen extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             label,
-            style: TextStyle(
+            style: GoogleFonts.nunito(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
               color: labelColor,
@@ -176,7 +183,7 @@ class OverviewScreen extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               stage.label,
-              style: TextStyle(
+              style: GoogleFonts.nunito(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w700,
                 color: tokens.text,
@@ -186,7 +193,7 @@ class OverviewScreen extends StatelessWidget {
             Text(
               '${stat.count}',
               key: Key('overview-stage-count-${stage.serialized}'),
-              style: TextStyle(
+              style: GoogleFonts.nunito(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w800,
                 color: tokens.muted,
@@ -234,7 +241,7 @@ class OverviewScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         loc.name,
-                        style: TextStyle(
+                        style: GoogleFonts.nunito(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w700,
                           color: tokens.text,
@@ -243,7 +250,7 @@ class OverviewScreen extends StatelessWidget {
                     ),
                     Text(
                       '${loc.count}',
-                      style: TextStyle(
+                      style: GoogleFonts.nunito(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w800,
                         color: tokens.muted,
@@ -261,10 +268,10 @@ class OverviewScreen extends StatelessWidget {
   Widget _microLabel(DesignTokens tokens, String label) {
     return Text(
       label.toUpperCase(),
-      style: TextStyle(
-        fontSize: 11,
+      style: GoogleFonts.nunito(
+        fontSize: 12.5,
         fontWeight: FontWeight.w800,
-        letterSpacing: 0.1,
+        letterSpacing: 0.625,
         color: tokens.faint,
       ),
     );

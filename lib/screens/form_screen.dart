@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/life_stage.dart';
 import '../models/month_names.dart';
@@ -180,7 +181,10 @@ class _FormScreenState extends State<FormScreen> {
               // person's profile is not left on the navigation stack.
               Navigator.popUntil(context, (route) => route.isFirst);
             },
-            child: Text('Delete', style: TextStyle(color: ctx.tokens.danger)),
+            child: Text(
+              'Delete',
+              style: GoogleFonts.nunito(color: ctx.tokens.danger),
+            ),
           ),
         ],
       ),
@@ -196,6 +200,7 @@ class _FormScreenState extends State<FormScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            const AppTopRow(),
             _header(tokens, isEditing),
             Expanded(
               child: Form(
@@ -207,7 +212,7 @@ class _FormScreenState extends State<FormScreen> {
                     children: [
                       Center(child: _avatarPreview(tokens)),
                       const SizedBox(height: 22),
-                      _microLabel(tokens, 'Full name'),
+                      _microLabel(tokens, 'Name'),
                       const SizedBox(height: 8),
                       _nameField(tokens),
                       const SizedBox(height: 18),
@@ -226,7 +231,7 @@ class _FormScreenState extends State<FormScreen> {
                       _field(
                         key: const Key('field-location'),
                         controller: _locationController,
-                        hint: 'e.g. City',
+                        hint: 'City',
                       ),
                       const SizedBox(height: 18),
                       _microLabel(
@@ -295,7 +300,7 @@ class _FormScreenState extends State<FormScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               child: Text(
                 'Cancel',
-                style: TextStyle(
+                style: GoogleFonts.nunito(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: tokens.muted,
@@ -307,15 +312,13 @@ class _FormScreenState extends State<FormScreen> {
             child: Text(
               isEditing ? 'Edit person' : 'Add person',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: GoogleFonts.nunito(
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
                 color: tokens.text,
               ),
             ),
           ),
-          const ThemeToggleButton(),
-          const SizedBox(width: 8),
           InkWell(
             key: const Key('form-save'),
             onTap: _save,
@@ -324,7 +327,7 @@ class _FormScreenState extends State<FormScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
               child: Text(
                 'Save',
-                style: TextStyle(
+                style: GoogleFonts.nunito(
                   fontSize: 16,
                   fontWeight: FontWeight.w900,
                   color: tokens.accent,
@@ -344,7 +347,7 @@ class _FormScreenState extends State<FormScreen> {
       backgroundColor: _stage.avatarBg,
       child: Text(
         _initials,
-        style: TextStyle(
+        style: GoogleFonts.nunito(
           color: _stage.avatarColor,
           fontWeight: FontWeight.w900,
           fontSize: 26,
@@ -360,20 +363,20 @@ class _FormScreenState extends State<FormScreen> {
       children: [
         Text(
           label.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
+          style: GoogleFonts.nunito(
+            fontSize: 12,
             fontWeight: FontWeight.w800,
-            letterSpacing: 0.08,
+            letterSpacing: 0.6,
             color: tokens.faint,
           ),
         ),
         if (suffix != null)
           Text(
             ' $suffix',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: tokens.faint,
+            style: GoogleFonts.nunito(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: tokens.faint2,
             ),
           ),
       ],
@@ -395,7 +398,7 @@ class _FormScreenState extends State<FormScreen> {
       keyboardType: keyboardType,
       maxLines: maxLines,
       validator: validator,
-      style: TextStyle(
+      style: GoogleFonts.nunito(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: tokens.text,
@@ -408,12 +411,12 @@ class _FormScreenState extends State<FormScreen> {
           horizontal: 14,
           vertical: 13,
         ),
-        hintStyle: TextStyle(
+        hintStyle: GoogleFonts.nunito(
           fontSize: 13.5,
           fontWeight: FontWeight.w500,
-          color: tokens.faint,
+          color: tokens.faint2,
         ),
-        errorStyle: TextStyle(
+        errorStyle: GoogleFonts.nunito(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: tokens.danger,
@@ -428,7 +431,7 @@ class _FormScreenState extends State<FormScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
-          borderSide: BorderSide(color: tokens.accent, width: 1.5),
+          borderSide: BorderSide(color: tokens.accent),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
@@ -436,7 +439,7 @@ class _FormScreenState extends State<FormScreen> {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
-          borderSide: BorderSide(color: tokens.danger, width: 1.5),
+          borderSide: BorderSide(color: tokens.danger),
         ),
       ),
     );
@@ -448,25 +451,25 @@ class _FormScreenState extends State<FormScreen> {
       controller: _nameController,
       validator: (val) =>
           val == null || val.trim().isEmpty ? 'Name is required' : null,
-      style: TextStyle(
+      style: GoogleFonts.nunito(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: tokens.text,
       ),
       decoration: InputDecoration(
-        hintText: 'e.g. Maya Chen',
+        hintText: 'Full name',
         filled: true,
         fillColor: tokens.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 13,
         ),
-        hintStyle: TextStyle(
+        hintStyle: GoogleFonts.nunito(
           fontSize: 13.5,
           fontWeight: FontWeight.w500,
-          color: tokens.faint,
+          color: tokens.faint2,
         ),
-        errorStyle: TextStyle(
+        errorStyle: GoogleFonts.nunito(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: tokens.danger,
@@ -481,7 +484,7 @@ class _FormScreenState extends State<FormScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
-          borderSide: BorderSide(color: tokens.accent, width: 1.5),
+          borderSide: BorderSide(color: tokens.accent),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
@@ -489,7 +492,7 @@ class _FormScreenState extends State<FormScreen> {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(13),
-          borderSide: BorderSide(color: tokens.danger, width: 1.5),
+          borderSide: BorderSide(color: tokens.danger),
         ),
       ),
     );
@@ -501,23 +504,28 @@ class _FormScreenState extends State<FormScreen> {
         final isActive = _stage == stage;
         return Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(right: 4),
+            padding: EdgeInsets.only(
+              right: stage == LifeStage.values.last ? 0 : 6,
+            ),
             child: InkWell(
               key: Key('stage-segment-${stage.serialized}'),
               onTap: () => setState(() => _stage = stage),
               borderRadius: BorderRadius.circular(11),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: isActive ? stage.avatarBg : tokens.track,
+                  color: isActive ? stage.avatarBg : tokens.surface,
                   borderRadius: BorderRadius.circular(11),
+                  border: Border.all(
+                    color: isActive ? stage.avatarBg : tokens.chipBorder,
+                  ),
                 ),
                 child: Center(
                   child: Text(
                     stage.label,
-                    style: TextStyle(
-                      fontSize: 13,
+                    style: GoogleFonts.nunito(
+                      fontSize: 12,
                       fontWeight: FontWeight.w800,
                       color: isActive ? Colors.white : tokens.chipText,
                     ),
@@ -549,7 +557,7 @@ class _FormScreenState extends State<FormScreen> {
             onChanged: (val) {
               if (val != null) setState(() => _bMonth = val);
             },
-            style: TextStyle(
+            style: GoogleFonts.nunito(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: tokens.text,
@@ -572,7 +580,7 @@ class _FormScreenState extends State<FormScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(13),
-                borderSide: BorderSide(color: tokens.accent, width: 1.5),
+                borderSide: BorderSide(color: tokens.accent),
               ),
             ),
           ),
@@ -628,8 +636,9 @@ class _FormScreenState extends State<FormScreen> {
 
   static int _daysInMonth(int month, int? year) {
     if (month == 2) {
-      final y = year ?? 2001; // non-leap default when the year is unknown
-      return _isLeapYear(y) ? 29 : 28;
+      // Without a year, allow Feb 29 (the person may be a leap-day baby).
+      if (year == null) return 29;
+      return _isLeapYear(year) ? 29 : 28;
     }
     const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     return days[month - 1];
@@ -709,7 +718,7 @@ class _FormScreenState extends State<FormScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Text(
             'Delete person',
-            style: TextStyle(
+            style: GoogleFonts.nunito(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: tokens.danger,

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/design_tokens.dart';
 import '../widgets/app_chrome.dart';
 import 'directory_screen.dart';
@@ -40,6 +41,8 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Let tab content scroll beneath the translucent, blurred tab bar.
+      extendBody: true,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -84,17 +87,19 @@ class _CircleTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return Container(
+    return ClipRect(
       key: const Key('circle-tab-bar'),
-      height: 64,
-      decoration: BoxDecoration(
-        color: tokens.tabbar,
-        border: Border(top: BorderSide(color: tokens.border, width: 1)),
-      ),
-      child: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          height: 64 + bottomInset,
+          padding: EdgeInsets.only(bottom: bottomInset),
+          decoration: BoxDecoration(
+            color: tokens.tabbar,
+            border: Border(top: BorderSide(color: tokens.border, width: 1)),
+          ),
           child: Row(
             children: _tabs.asMap().entries.map((entry) {
               final index = entry.key;
@@ -123,7 +128,7 @@ class _CircleTabBar extends StatelessWidget {
                       const SizedBox(height: 5),
                       Text(
                         label,
-                        style: TextStyle(
+                        style: GoogleFonts.nunito(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w800,
                           color: color,

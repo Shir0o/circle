@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/month_names.dart';
 import '../models/person.dart';
@@ -17,6 +18,7 @@ class BirthdaysScreen extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -29,10 +31,10 @@ class BirthdaysScreen extends StatelessWidget {
                   Text(
                     'Birthdays',
                     key: const Key('birthdays-title'),
-                    style: TextStyle(
+                    style: GoogleFonts.nunito(
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: -0.02,
+                      letterSpacing: -0.48,
                       color: tokens.text,
                       height: 1,
                     ),
@@ -40,7 +42,7 @@ class BirthdaysScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     'Next up in your circle',
-                    style: TextStyle(
+                    style: GoogleFonts.nunito(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: tokens.muted,
@@ -52,10 +54,17 @@ class BirthdaysScreen extends StatelessWidget {
 
             // Birthday rows or an empty state.
             Expanded(
-              child: entries.isEmpty
+              child: !provider.isInitialized
+                  ? const SizedBox.shrink()
+                  : entries.isEmpty
                   ? _buildEmptyState(context, tokens)
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(18, 2, 18, 20),
+                      padding: EdgeInsets.fromLTRB(
+                        18,
+                        2,
+                        18,
+                        20 + MediaQuery.paddingOf(context).bottom,
+                      ),
                       itemCount: entries.length,
                       itemBuilder: (context, index) {
                         final entry = entries[index];
@@ -82,7 +91,7 @@ class BirthdaysScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'No birthdays yet',
-            style: TextStyle(
+            style: GoogleFonts.nunito(
               fontSize: 16,
               fontWeight: FontWeight.w800,
               color: tokens.text,
@@ -144,7 +153,7 @@ class _BirthdayRow extends StatelessWidget {
                 backgroundColor: person.stage.avatarBg,
                 child: Text(
                   person.initials,
-                  style: TextStyle(
+                  style: GoogleFonts.nunito(
                     color: person.stage.avatarColor,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
@@ -158,7 +167,7 @@ class _BirthdayRow extends StatelessWidget {
                   children: [
                     Text(
                       person.name,
-                      style: TextStyle(
+                      style: GoogleFonts.nunito(
                         fontSize: 15.5,
                         fontWeight: FontWeight.w800,
                         color: tokens.text,
@@ -168,7 +177,7 @@ class _BirthdayRow extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       dateLine,
-                      style: TextStyle(
+                      style: GoogleFonts.nunito(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: tokens.muted,
@@ -184,7 +193,7 @@ class _BirthdayRow extends StatelessWidget {
                   Text(
                     days == 0 ? '🎉' : '$days',
                     key: Key('birthday-count-${person.id}'),
-                    style: TextStyle(
+                    style: GoogleFonts.nunito(
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       color: isSoon ? tokens.accent : tokens.text,
@@ -193,7 +202,7 @@ class _BirthdayRow extends StatelessWidget {
                   Text(
                     days == 0 ? 'today' : (days == 1 ? 'day' : 'days'),
                     key: Key('birthday-unit-${person.id}'),
-                    style: TextStyle(
+                    style: GoogleFonts.nunito(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: tokens.faint,

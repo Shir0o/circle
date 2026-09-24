@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/life_stage.dart';
 import '../models/month_names.dart';
@@ -60,73 +61,82 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(22, 10, 22, 32),
+          padding: const EdgeInsets.only(bottom: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _header(context, tokens, currentPerson),
-              const SizedBox(height: 18),
-              _identity(context, tokens, currentPerson, meta, age),
-              const SizedBox(height: 24),
-              _detailsCard(tokens, infoRows),
-              if (currentPerson.interests.isNotEmpty) ...[
-                const SizedBox(height: 26),
-                _sectionLabel(tokens, 'Interests'),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+              const AppTopRow(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 22),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (final interest in currentPerson.interests)
-                      _pill(
-                        key: Key('interest-pill-$interest'),
-                        label: interest,
-                        bg: tokens.tagWarmBg,
-                        textColor: tokens.tagWarmText,
+                    _header(context, tokens, currentPerson),
+                    const SizedBox(height: 18),
+                    _identity(context, tokens, currentPerson, meta, age),
+                    const SizedBox(height: 24),
+                    _detailsCard(tokens, infoRows),
+                    if (currentPerson.interests.isNotEmpty) ...[
+                      const SizedBox(height: 26),
+                      _sectionLabel(tokens, 'Interests'),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final interest in currentPerson.interests)
+                            _pill(
+                              key: Key('interest-pill-$interest'),
+                              label: interest,
+                              bg: tokens.tagWarmBg,
+                              textColor: tokens.tagWarmText,
+                            ),
+                        ],
                       ),
+                    ],
+                    if (currentPerson.dietary.isNotEmpty) ...[
+                      const SizedBox(height: 26),
+                      _sectionLabel(tokens, 'Dietary'),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final pref in currentPerson.dietary)
+                            _pill(
+                              key: Key('dietary-pill-$pref'),
+                              label: pref,
+                              bg: tokens.tagMintBg,
+                              textColor: tokens.tagMintText,
+                            ),
+                        ],
+                      ),
+                    ],
+                    if (currentPerson.notes.trim().isNotEmpty) ...[
+                      const SizedBox(height: 26),
+                      _sectionLabel(tokens, 'Notes & preferences'),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: tokens.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: tokens.border, width: 1),
+                        ),
+                        child: Text(
+                          currentPerson.notes,
+                          style: GoogleFonts.nunito(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: tokens.text2,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-              ],
-              if (currentPerson.dietary.isNotEmpty) ...[
-                const SizedBox(height: 26),
-                _sectionLabel(tokens, 'Dietary'),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final pref in currentPerson.dietary)
-                      _pill(
-                        key: Key('dietary-pill-$pref'),
-                        label: pref,
-                        bg: tokens.tagMintBg,
-                        textColor: tokens.tagMintText,
-                      ),
-                  ],
-                ),
-              ],
-              if (currentPerson.notes.trim().isNotEmpty) ...[
-                const SizedBox(height: 26),
-                _sectionLabel(tokens, 'Notes & preferences'),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: tokens.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: tokens.border, width: 1),
-                  ),
-                  child: Text(
-                    currentPerson.notes,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: tokens.text2,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ],
           ),
         ),
@@ -151,7 +161,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Text(
                   '‹',
-                  style: TextStyle(
+                  style: GoogleFonts.nunito(
                     fontSize: 22,
                     height: 1,
                     fontWeight: FontWeight.w600,
@@ -161,7 +171,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   'People',
-                  style: TextStyle(
+                  style: GoogleFonts.nunito(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: tokens.muted,
@@ -172,8 +182,6 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        const ThemeToggleButton(),
-        const SizedBox(width: 10),
         Material(
           color: tokens.accentBg,
           shape: RoundedRectangleBorder(
@@ -194,7 +202,7 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 'Edit',
-                style: TextStyle(
+                style: GoogleFonts.nunito(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                   color: tokens.accent,
@@ -222,7 +230,7 @@ class ProfileScreen extends StatelessWidget {
           backgroundColor: meta.avatarBg,
           child: Text(
             currentPerson.initials,
-            style: TextStyle(
+            style: GoogleFonts.nunito(
               color: meta.avatarColor,
               fontWeight: FontWeight.w900,
               fontSize: 30,
@@ -233,10 +241,10 @@ class ProfileScreen extends StatelessWidget {
         Text(
           currentPerson.name,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: GoogleFonts.nunito(
             fontSize: 23,
             fontWeight: FontWeight.w900,
-            letterSpacing: -0.02,
+            letterSpacing: -0.23,
             color: tokens.text,
           ),
         ),
@@ -261,7 +269,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 '${meta.label} · ${age != null ? '$age yrs' : '—'}',
-                style: TextStyle(
+                style: GoogleFonts.nunito(
                   color: meta.color,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
@@ -275,7 +283,7 @@ class ProfileScreen extends StatelessWidget {
           Text(
             currentPerson.howKnow,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: GoogleFonts.nunito(
               fontSize: 13.5,
               fontWeight: FontWeight.w600,
               color: tokens.muted,
@@ -303,19 +311,20 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   Text(
                     rows[i].$1.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.08,
+                    style: GoogleFonts.nunito(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.625,
                       color: tokens.faint,
                     ),
                   ),
-                  const Spacer(),
-                  Flexible(
+                  const SizedBox(width: 12),
+                  Expanded(
                     child: Text(
+                      key: Key('detail-value-${rows[i].$1}'),
                       rows[i].$2,
                       textAlign: TextAlign.right,
-                      style: TextStyle(
+                      style: GoogleFonts.nunito(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: tokens.text,
@@ -334,10 +343,10 @@ class ProfileScreen extends StatelessWidget {
   Widget _sectionLabel(DesignTokens tokens, String label) {
     return Text(
       label.toUpperCase(),
-      style: TextStyle(
-        fontSize: 11,
+      style: GoogleFonts.nunito(
+        fontSize: 12.5,
         fontWeight: FontWeight.w800,
-        letterSpacing: 0.1,
+        letterSpacing: 0.625,
         color: tokens.faint,
       ),
     );
@@ -358,7 +367,7 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: GoogleFonts.nunito(
           fontSize: 13,
           fontWeight: FontWeight.w700,
           color: textColor,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
@@ -24,7 +25,7 @@ class ThemeToggleButton extends StatelessWidget {
           child: Center(
             child: Text(
               provider.isDarkMode ? '☀' : '☾',
-              style: TextStyle(color: tokens.accent, fontSize: 15),
+              style: GoogleFonts.nunito(color: tokens.accent, fontSize: 15),
             ),
           ),
         ),

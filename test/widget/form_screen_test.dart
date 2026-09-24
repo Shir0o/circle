@@ -8,6 +8,7 @@ import 'package:circle/models/life_stage.dart';
 import 'package:circle/models/person.dart';
 import 'package:circle/providers/people_provider.dart';
 import 'package:circle/screens/form_screen.dart';
+import 'package:circle/theme/design_tokens.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -138,7 +139,7 @@ void main() {
     await pumpForm(tester);
 
     final labels = [
-      'FULL NAME',
+      'NAME',
       'LIFE STAGE',
       'BIRTHDAY',
       'YEAR IN SCHOOL',
