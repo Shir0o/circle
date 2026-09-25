@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/life_stage.dart';
 import '../models/month_names.dart';
@@ -30,6 +31,7 @@ class DirectoryScreen extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -44,10 +46,10 @@ class DirectoryScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Circle',
-                          style: TextStyle(
+                          style: GoogleFonts.nunito(
                             fontSize: 27,
                             fontWeight: FontWeight.w900,
-                            letterSpacing: -0.02,
+                            letterSpacing: -0.54,
                             color: tokens.text,
                             height: 1,
                           ),
@@ -55,7 +57,7 @@ class DirectoryScreen extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           '${people.length} of $total people',
-                          style: TextStyle(
+                          style: GoogleFonts.nunito(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: tokens.muted,
@@ -90,7 +92,7 @@ class DirectoryScreen extends StatelessWidget {
                           child: Center(
                             child: Text(
                               '+',
-                              style: TextStyle(
+                              style: GoogleFonts.nunito(
                                 fontSize: 26,
                                 fontWeight: FontWeight.w700,
                                 height: 1,
@@ -126,7 +128,7 @@ class DirectoryScreen extends StatelessWidget {
                     Flexible(
                       child: Text(
                         provider.nextBirthdayBannerText,
-                        style: TextStyle(
+                        style: GoogleFonts.nunito(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           color: tokens.muted,
@@ -153,10 +155,10 @@ class DirectoryScreen extends StatelessWidget {
                     horizontal: 16,
                     vertical: 14,
                   ),
-                  hintStyle: TextStyle(
+                  hintStyle: GoogleFonts.nunito(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w600,
-                    color: tokens.faint,
+                    color: tokens.faint2,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -168,7 +170,7 @@ class DirectoryScreen extends StatelessWidget {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(color: tokens.accent, width: 1.5),
+                    borderSide: BorderSide(color: tokens.accent),
                   ),
                 ),
               ),
@@ -214,6 +216,10 @@ class DirectoryScreen extends StatelessWidget {
   ) {
     final theme = Theme.of(context);
 
+    // Render nothing until stored people have loaded, so returning users
+    // never see the first-run empty state flash.
+    if (!provider.isInitialized) return const SizedBox.shrink();
+
     if (provider.people.isEmpty) {
       return Center(
         child: Column(
@@ -223,7 +229,7 @@ class DirectoryScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               'Your circle is empty',
-              style: TextStyle(
+              style: GoogleFonts.nunito(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 color: tokens.text,
@@ -243,7 +249,7 @@ class DirectoryScreen extends StatelessWidget {
       return Center(
         child: Text(
           'No one matches that yet.',
-          style: TextStyle(
+          style: GoogleFonts.nunito(
             fontSize: 14,
             fontWeight: FontWeight.w700,
             color: tokens.faint,
@@ -253,7 +259,12 @@ class DirectoryScreen extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(18, 2, 18, 20),
+      padding: EdgeInsets.fromLTRB(
+        18,
+        2,
+        18,
+        20 + MediaQuery.paddingOf(context).bottom,
+      ),
       itemCount: people.length,
       itemBuilder: (context, index) {
         final person = people[index];
@@ -319,7 +330,7 @@ class _StageChip extends StatelessWidget {
               ],
               Text(
                 label,
-                style: TextStyle(
+                style: GoogleFonts.nunito(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w800,
                   color: isActive ? Colors.white : tokens.chipText,
@@ -331,7 +342,7 @@ class _StageChip extends StatelessWidget {
                 child: Text(
                   '$count',
                   key: Key('chip-count-$chipKey'),
-                  style: TextStyle(
+                  style: GoogleFonts.nunito(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w800,
                     color: isActive ? Colors.white : tokens.chipText,
@@ -387,7 +398,7 @@ class _PersonCard extends StatelessWidget {
                 backgroundColor: meta.avatarBg,
                 child: Text(
                   person.initials,
-                  style: TextStyle(
+                  style: GoogleFonts.nunito(
                     color: meta.avatarColor,
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
@@ -404,7 +415,7 @@ class _PersonCard extends StatelessWidget {
                         Flexible(
                           child: Text(
                             person.name,
-                            style: TextStyle(
+                            style: GoogleFonts.nunito(
                               fontSize: 15.5,
                               fontWeight: FontWeight.w800,
                               color: tokens.text,
@@ -436,7 +447,7 @@ class _PersonCard extends StatelessWidget {
                               const SizedBox(width: 5),
                               Text(
                                 meta.label,
-                                style: TextStyle(
+                                style: GoogleFonts.nunito(
                                   color: meta.color,
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.w800,
@@ -451,7 +462,7 @@ class _PersonCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         sub,
-                        style: TextStyle(
+                        style: GoogleFonts.nunito(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: tokens.muted,
@@ -462,7 +473,7 @@ class _PersonCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       metaLine,
-                      style: TextStyle(
+                      style: GoogleFonts.nunito(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: tokens.faint,
@@ -472,7 +483,10 @@ class _PersonCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text('›', style: TextStyle(fontSize: 20, color: tokens.chevron)),
+              Text(
+                '›',
+                style: GoogleFonts.nunito(fontSize: 20, color: tokens.chevron),
+              ),
             ],
           ),
         ),

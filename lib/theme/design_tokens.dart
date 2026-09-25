@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/life_stage.dart';
 
 class DesignTokens {
   final Color bg;
@@ -120,4 +121,35 @@ extension DesignTokensContext on BuildContext {
   DesignTokens get tokens => Theme.of(this).brightness == Brightness.dark
       ? DesignTokens.dark
       : DesignTokens.light;
+}
+
+/// Stage colours from the design. They are identical in light and dark.
+extension StageColors on LifeStage {
+  Color get bg => switch (this) {
+    LifeStage.kids => const Color(0xFFFEF1CF),
+    LifeStage.teens => const Color(0xFFFFE0EC),
+    LifeStage.college => const Color(0xFFECE6FF),
+    LifeStage.working => const Color(0xFFD6F5EA),
+  };
+
+  Color get color => switch (this) {
+    LifeStage.kids => const Color(0xFFB27A00),
+    LifeStage.teens => const Color(0xFFC13567),
+    LifeStage.college => const Color(0xFF5B3EDA),
+    LifeStage.working => const Color(0xFF0B7A56),
+  };
+
+  Color get avatarBg => switch (this) {
+    LifeStage.kids => const Color(0xFFF5B700),
+    LifeStage.teens => const Color(0xFFFF5D8F),
+    LifeStage.college => const Color(0xFF7C5CFC),
+    LifeStage.working => const Color(0xFF12B981),
+  };
+
+  Color get avatarColor => switch (this) {
+    LifeStage.kids => const Color(0xFF3A2C00),
+    LifeStage.teens => const Color(0xFF4A0A22),
+    LifeStage.college => const Color(0xFF1E1147),
+    LifeStage.working => const Color(0xFF04331F),
+  };
 }
