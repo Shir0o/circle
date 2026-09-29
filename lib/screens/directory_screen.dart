@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/life_stage.dart';
-import '../models/month_names.dart';
 import '../models/person.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
@@ -370,7 +369,7 @@ class _PersonCard extends StatelessWidget {
     final sub = person.subLine(referenceDate: provider.today);
     final metaLine = [
       if (person.location.isNotEmpty) person.location,
-      '${monthNames[person.bMonth - 1]} ${person.bDay}',
+      ?person.birthdayLabel,
     ].join(' · ');
 
     return Container(

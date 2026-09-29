@@ -137,17 +137,18 @@ class PeopleProvider extends ChangeNotifier {
   }
 
   String get nextBirthdayBannerText {
-    if (_people.isEmpty) return 'No birthdays yet';
     final today = _clock.today;
-    final sorted =
-        _people
-            .map((p) => MapEntry(p, p.daysUntilBirthday(referenceDate: today)))
-            .toList()
-          ..sort((a, b) => a.value.compareTo(b.value));
+    // Only day-bearing birthdays can be counted down; a day-less birthday has
+    // no specific date to count to.
+    final dated = _people
+        .map((p) => MapEntry(p, p.daysUntilBirthday(referenceDate: today)))
+        .where((e) => e.value != null)
+        .toList();
+    if (dated.isEmpty) return 'No birthdays yet';
 
-    final next = sorted.first;
-    final person = next.key;
-    final days = next.value;
+    dated.sort((a, b) => a.value!.compareTo(b.value!));
+    final person = dated.first.key;
+    final days = dated.first.value!;
 
     final turns = person.turnsAge(referenceDate: today);
     final firstName = person.name.split(' ').first;
@@ -162,14 +163,37 @@ class PeopleProvider extends ChangeNotifier {
     }
   }
 
-  List<MapEntry<Person, int>> get upcomingBirthdays {
+  /// Every person with a birthday, ordered by how soon it arrives. A day-less
+  /// birthday is ordered at the start of its birth month; its value is null
+  /// because there is no countable day, and callers should render it without a
+  /// day countdown.
+  List<MapEntry<Person, int?>> get upcomingBirthdays {
     final today = _clock.today;
-    final list =
-        _people
-            .map((p) => MapEntry(p, p.daysUntilBirthday(referenceDate: today)))
-            .toList()
-          ..sort((a, b) => a.value.compareTo(b.value));
-    return list;
+    final list = _people.where((p) => p.hasBirthday).toList()
+      ..sort((a, b) {
+        final bySoon = _birthdaySortKey(
+          a,
+          today,
+        ).compareTo(_birthdaySortKey(b, today));
+        return bySoon != 0
+            ? bySoon
+            : a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
+    return [
+      for (final p in list)
+        MapEntry(p, p.daysUntilBirthday(referenceDate: today)),
+    ];
+  }
+
+  /// Ordering key in days: the birthday itself when a day is known, otherwise
+  /// the first of the birth month.
+  int _birthdaySortKey(Person p, DateTime today) {
+    final days = p.daysUntilBirthday(referenceDate: today);
+    if (days != null) return days;
+    final start = DateTime(today.year, today.month, today.day);
+    var first = DateTime(today.year, p.bMonth!, 1);
+    if (first.isBefore(start)) first = DateTime(today.year + 1, p.bMonth!, 1);
+    return first.difference(start).inDays;
   }
 
   OverviewStats get overviewStats =>

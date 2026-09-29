@@ -110,7 +110,7 @@ class BirthdaysScreen extends StatelessWidget {
 
 class _BirthdayRow extends StatelessWidget {
   final Person person;
-  final int days;
+  final int? days;
 
   const _BirthdayRow({required this.person, required this.days});
 
@@ -118,11 +118,15 @@ class _BirthdayRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<PeopleProvider>(context);
     final tokens = context.tokens;
-    final isSoon = days <= 30;
-    final turns = person.turnsAge(referenceDate: provider.today);
+    final isSoon = days != null && days! <= 30;
+    final hasDay = person.bDay != null;
+    final turns = hasDay
+        ? person.turnsAge(referenceDate: provider.today)
+        : null;
+    final monthLabel = monthNames[person.bMonth! - 1];
+    final dayPart = hasDay ? ' ${person.bDay}' : '';
     final dateLine =
-        '${monthNames[person.bMonth - 1]} ${person.bDay}'
-        '${turns != null ? ' · turns $turns' : ''}';
+        '$monthLabel$dayPart${turns != null ? ' · turns $turns' : ''}';
 
     return Container(
       key: Key('birthday-row-${person.id}'),
@@ -186,30 +190,32 @@ class _BirthdayRow extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    days == 0 ? '🎉' : '$days',
-                    key: Key('birthday-count-${person.id}'),
-                    style: GoogleFonts.nunito(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      color: isSoon ? tokens.accent : tokens.text,
+              if (days != null) ...[
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      days == 0 ? '🎉' : '$days',
+                      key: Key('birthday-count-${person.id}'),
+                      style: GoogleFonts.nunito(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        color: isSoon ? tokens.accent : tokens.text,
+                      ),
                     ),
-                  ),
-                  Text(
-                    days == 0 ? 'today' : (days == 1 ? 'day' : 'days'),
-                    key: Key('birthday-unit-${person.id}'),
-                    style: GoogleFonts.nunito(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: tokens.faint,
+                    Text(
+                      days == 0 ? 'today' : (days == 1 ? 'day' : 'days'),
+                      key: Key('birthday-unit-${person.id}'),
+                      style: GoogleFonts.nunito(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: tokens.faint,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

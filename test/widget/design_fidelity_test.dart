@@ -111,7 +111,7 @@ void main() {
     );
   });
 
-  testWidgets('Feb 29 can be saved without a birth year', (
+  testWidgets('Feb 29 saves with a leap birth year', (
     WidgetTester tester,
   ) async {
     await pumpCircle(tester, const []);
@@ -119,9 +119,17 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byKey(const Key('field-name')), 'Leap Baby');
+    await tester.tap(find.byKey(const Key('add-birthday')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('field-birthday-month')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Feb').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('field-birthday-year')),
+      '2024',
+    );
+    await tester.tap(find.byKey(const Key('add-day-checkbox')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('field-birthday-day')), '29');
     await tester.tap(find.byKey(const Key('form-save')));
@@ -129,6 +137,6 @@ void main() {
 
     expect(find.text('Invalid day for this month'), findsNothing);
     expect(find.text('Leap Baby'), findsOneWidget);
-    expect(find.text('Feb 29'), findsOneWidget);
+    expect(find.text('Feb 29, 2024'), findsOneWidget);
   });
 }
