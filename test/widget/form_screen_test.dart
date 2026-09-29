@@ -67,19 +67,58 @@ void main() {
     expect(find.byKey(const Key('delete-person')), findsNothing);
   });
 
-  testWidgets('Day and Year are empty for a new person', (
+  testWidgets('birthday stays collapsed until Add birthday is tapped', (
     WidgetTester tester,
   ) async {
     await pumpForm(tester);
 
-    final day = tester.widget<TextFormField>(
-      find.byKey(const Key('field-birthday-day')),
-    );
+    expect(find.byKey(const Key('add-birthday')), findsOneWidget);
+    expect(find.byKey(const Key('field-birthday-month')), findsNothing);
+    expect(find.byKey(const Key('field-birthday-year')), findsNothing);
+    expect(find.byKey(const Key('field-birthday-day')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('add-birthday')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Month'), findsOneWidget); // unset placeholder
     final year = tester.widget<TextFormField>(
       find.byKey(const Key('field-birthday-year')),
     );
-    expect(day.controller!.text, isEmpty);
     expect(year.controller!.text, isEmpty);
+    // The day only appears once "Add day" is checked.
+    expect(find.byKey(const Key('field-birthday-day')), findsNothing);
+  });
+
+  testWidgets('edit mode opens the birthday editor for a person who has one', (
+    WidgetTester tester,
+  ) async {
+    final person = Person(
+      id: 1,
+      name: 'Maya Chen',
+      stage: LifeStage.college,
+      bMonth: 5,
+      bDay: 20,
+      bYear: 2003,
+    );
+    await pumpForm(tester, person: person);
+
+    expect(find.byKey(const Key('add-birthday')), findsNothing);
+    expect(find.byKey(const Key('field-birthday-month')), findsOneWidget);
+    expect(find.byKey(const Key('field-birthday-day')), findsOneWidget);
+  });
+
+  testWidgets('the name field is title-cased live as you type', (
+    WidgetTester tester,
+  ) async {
+    await pumpForm(tester);
+
+    await tester.enterText(find.byKey(const Key('field-name')), 'maya chen');
+    await tester.pumpAndSettle();
+
+    final name = tester.widget<TextFormField>(
+      find.byKey(const Key('field-name')),
+    );
+    expect(name.controller!.text, 'Maya Chen');
   });
 
   testWidgets('avatar preview updates initials as the name changes', (

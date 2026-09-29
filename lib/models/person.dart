@@ -1,11 +1,12 @@
 import 'life_stage.dart';
+import 'month_names.dart';
 
 class Person {
   final int id;
   final String name;
   final LifeStage stage;
-  final int bMonth;
-  final int bDay;
+  final int? bMonth;
+  final int? bDay;
   final int? bYear;
   final String year;
   final String major;
@@ -22,8 +23,8 @@ class Person {
     required this.id,
     required this.name,
     required this.stage,
-    required this.bMonth,
-    required this.bDay,
+    this.bMonth,
+    this.bDay,
     this.bYear,
     this.year = '',
     this.major = '',
@@ -48,46 +49,80 @@ class Person {
     return (words[0][0] + words[1][0]).toUpperCase();
   }
 
+  /// Whether this person has any birthday recorded. A birthday may still be
+  /// day-less (month and year known, day unknown).
+  bool get hasBirthday => bMonth != null;
+
+  /// Human-readable birthday: `March 12, 1990` for a full date, `March 1990`
+  /// for a day-less birthday, or null when no birthday is recorded.
+  String? get birthdayLabel {
+    final month = bMonth;
+    if (month == null) return null;
+    final monthName = monthNames[month - 1];
+    final day = bDay;
+    final year = bYear;
+    if (day == null) return year == null ? monthName : '$monthName $year';
+    return year == null ? '$monthName $day' : '$monthName $day, $year';
+  }
+
   int? getAge({required DateTime referenceDate}) {
-    if (bYear == null) return null;
-    int age = referenceDate.year - bYear!;
-    if (referenceDate.month < bMonth ||
-        (referenceDate.month == bMonth && referenceDate.day < bDay)) {
+    final year = bYear;
+    final month = bMonth;
+    if (year == null || month == null) return null;
+    var age = referenceDate.year - year;
+    final day = bDay;
+    if (day == null) {
+      // No day known: fall back to month precision.
+      if (referenceDate.month < month) age--;
+    } else if (referenceDate.month < month ||
+        (referenceDate.month == month && referenceDate.day < day)) {
       age--;
     }
     return age;
   }
 
-  int daysUntilBirthday({required DateTime referenceDate}) {
+  /// Days until the next birthday celebration, or null when there is no
+  /// birthday or no day is known (a day-less birthday has no countable date).
+  int? daysUntilBirthday({required DateTime referenceDate}) {
+    final month = bMonth;
+    final day = bDay;
+    if (month == null || day == null) return null;
     final today = DateTime(
       referenceDate.year,
       referenceDate.month,
       referenceDate.day,
     );
-    var next = _birthdayInYear(today.year);
+    var next = _birthdayInYear(today.year, month, day);
     if (next.isBefore(today)) {
-      next = _birthdayInYear(today.year + 1);
+      next = _birthdayInYear(today.year + 1, month, day);
     }
     return next.difference(today).inDays;
   }
 
   int? turnsAge({required DateTime referenceDate}) {
-    if (bYear == null) return null;
-    final turnYear =
-        (bMonth > referenceDate.month ||
-            (bMonth == referenceDate.month && bDay >= referenceDate.day))
-        ? referenceDate.year
-        : referenceDate.year + 1;
-    return turnYear - bYear!;
+    final year = bYear;
+    final month = bMonth;
+    if (year == null || month == null) return null;
+    final day = bDay;
+    final turnYear = day == null
+        // No day known: treat the birth month as the turning point.
+        ? (month >= referenceDate.month
+              ? referenceDate.year
+              : referenceDate.year + 1)
+        : ((month > referenceDate.month ||
+                  (month == referenceDate.month && day >= referenceDate.day))
+              ? referenceDate.year
+              : referenceDate.year + 1);
+    return turnYear - year;
   }
 
   /// The date of this person's birthday within [year], mapping Feb 29 to
   /// Feb 28 in non-leap years so countdowns and ordering stay correct.
-  DateTime _birthdayInYear(int year) {
-    if (bMonth == 2 && bDay == 29 && !_isLeapYear(year)) {
+  DateTime _birthdayInYear(int year, int month, int day) {
+    if (month == 2 && day == 29 && !_isLeapYear(year)) {
       return DateTime(year, 2, 28);
     }
-    return DateTime(year, bMonth, bDay);
+    return DateTime(year, month, day);
   }
 
   static bool _isLeapYear(int year) =>
@@ -144,8 +179,8 @@ class Person {
       id: json['id'] as int,
       name: json['name'] as String? ?? '',
       stage: LifeStage.fromStorage(json['stage'] as String?),
-      bMonth: json['bMonth'] as int? ?? 1,
-      bDay: json['bDay'] as int? ?? 1,
+      bMonth: json['bMonth'] as int?,
+      bDay: json['bDay'] as int?,
       bYear: json['bYear'] as int?,
       year: json['year'] as String? ?? '',
       major: json['major'] as String? ?? '',

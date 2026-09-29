@@ -221,4 +221,32 @@ void main() {
     expect(find.text('Sofia Reyes'), findsOneWidget);
     expect(find.text('Maya Chen'), findsNothing);
   });
+
+  testWidgets('directory rows show each birthday with its year', (
+    WidgetTester tester,
+  ) async {
+    await pumpCircle(
+      tester,
+      people: [
+        Person(
+          id: 1,
+          name: 'Full Date',
+          stage: LifeStage.college,
+          bMonth: 5,
+          bDay: 20,
+          bYear: 2003,
+        ),
+        Person(
+          id: 2,
+          name: 'Day Less',
+          stage: LifeStage.working,
+          bMonth: 8,
+          bYear: 1990,
+        ),
+      ],
+    );
+
+    expect(find.text('May 20, 2003'), findsOneWidget);
+    expect(find.text('Aug 1990'), findsOneWidget);
+  });
 }

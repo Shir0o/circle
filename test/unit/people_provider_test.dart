@@ -112,6 +112,107 @@ void main() {
       expect(provider.overviewStats.birthdaysThisMonth, 2);
       expect(provider.overviewStats.total, 3);
     });
+
+    test('day-less birthdays list at the start of their month but are excluded '
+        'from the banner', () async {
+      final stored = [
+        Person(
+          id: 1,
+          name: 'Late August',
+          stage: LifeStage.working,
+          bMonth: 8,
+          bDay: 20,
+          bYear: 2000,
+        ),
+        Person(
+          id: 2,
+          name: 'Day Less',
+          stage: LifeStage.working,
+          bMonth: 8,
+          bYear: 1990,
+        ),
+        Person(
+          id: 3,
+          name: 'Mid July',
+          stage: LifeStage.working,
+          bMonth: 7,
+          bDay: 20,
+          bYear: 2001,
+        ),
+      ];
+      SharedPreferences.setMockInitialValues({
+        'circle_people_v1': jsonEncode(stored.map((p) => p.toJson()).toList()),
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final provider = PeopleProvider(prefs: prefs, clock: clock);
+      await provider.init();
+
+      // The nearest day-bearing birthday drives the banner, ignoring the
+      // day-less August entry even though July 20 is closer than August 20.
+      expect(provider.nextBirthdayBannerText, 'Mid turns 25 in 16 days');
+      expect(provider.upcomingBirthdays.map((e) => e.key.name).toList(), [
+        'Mid July',
+        'Day Less',
+        'Late August',
+      ]);
+      final dayLess = provider.upcomingBirthdays.firstWhere(
+        (e) => e.key.name == 'Day Less',
+      );
+      expect(dayLess.value, isNull);
+    });
+
+    test(
+      'people without a birthday are excluded from the list and the banner',
+      () async {
+        final stored = [
+          Person(id: 1, name: 'No Birthday', stage: LifeStage.working),
+          Person(
+            id: 2,
+            name: 'Day Less',
+            stage: LifeStage.working,
+            bMonth: 8,
+            bYear: 1990,
+          ),
+        ];
+        SharedPreferences.setMockInitialValues({
+          'circle_people_v1': jsonEncode(
+            stored.map((p) => p.toJson()).toList(),
+          ),
+        });
+        final prefs = await SharedPreferences.getInstance();
+        final provider = PeopleProvider(prefs: prefs, clock: clock);
+        await provider.init();
+
+        expect(provider.upcomingBirthdays.map((e) => e.key.name).toList(), [
+          'Day Less',
+        ]);
+        expect(provider.nextBirthdayBannerText, 'No birthdays yet');
+        expect(provider.overviewStats.total, 2);
+        expect(provider.overviewStats.birthdaysThisMonth, 0);
+      },
+    );
+
+    test('birthdays-this-month includes day-less birthdays by month', () async {
+      final stored = [
+        Person(
+          id: 1,
+          name: 'Day Less July',
+          stage: LifeStage.working,
+          bMonth: 7,
+          bYear: 1990,
+        ),
+        person(id: 2, name: 'Full July', bMonth: 7, bDay: 10),
+        person(id: 3, name: 'August', bMonth: 8, bDay: 1),
+      ];
+      SharedPreferences.setMockInitialValues({
+        'circle_people_v1': jsonEncode(stored.map((p) => p.toJson()).toList()),
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final provider = PeopleProvider(prefs: prefs, clock: clock);
+      await provider.init();
+
+      expect(provider.overviewStats.birthdaysThisMonth, 2);
+    });
   });
 
   group('PeopleProvider selection', () {

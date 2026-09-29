@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/life_stage.dart';
-import '../models/month_names.dart';
 import '../models/person.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
@@ -26,9 +25,7 @@ class ProfileScreen extends StatelessWidget {
 
     final meta = currentPerson.stage;
     final age = currentPerson.getAge(referenceDate: provider.today);
-    final bdayStr =
-        '${monthNames[currentPerson.bMonth - 1]} ${currentPerson.bDay}'
-        '${currentPerson.bYear != null ? ', ${currentPerson.bYear}' : ''}';
+    final bdayStr = currentPerson.birthdayLabel;
 
     final infoRows = <(String, String)>[];
     if (currentPerson.stage == LifeStage.college) {
@@ -52,7 +49,9 @@ class ProfileScreen extends StatelessWidget {
     } else if (currentPerson.occupation.isNotEmpty) {
       infoRows.add(('Occupation', currentPerson.occupation));
     }
-    infoRows.add(('Birthday', bdayStr));
+    if (bdayStr != null) {
+      infoRows.add(('Birthday', bdayStr));
+    }
     if (currentPerson.location.isNotEmpty) {
       infoRows.add(('Location', currentPerson.location));
     }

@@ -51,16 +51,20 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> fillRequired(
-    WidgetTester tester, {
-    String name = 'Maya Chen',
-  }) async {
+  Future<void> revealBirthday(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('add-birthday')));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> pickMonth(WidgetTester tester, String month) async {
+    await tester.tap(find.byKey(const Key('field-birthday-month')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(month).last);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> saveWithName(WidgetTester tester, String name) async {
     await tester.enterText(find.byKey(const Key('field-name')), name);
-    await tester.enterText(find.byKey(const Key('field-birthday-day')), '20');
-    await tester.enterText(
-      find.byKey(const Key('field-birthday-year')),
-      '2003',
-    );
     await tester.pumpAndSettle();
   }
 
@@ -89,7 +93,7 @@ void main() {
     ) async {
       await pumpCircle(tester);
       await openForm(tester);
-      await fillRequired(tester, name: 'Maya Chen');
+      await saveWithName(tester, 'Maya Chen');
       await tester.tap(find.byKey(const Key('form-save')));
       await tester.pumpAndSettle();
 
@@ -206,23 +210,19 @@ void main() {
       'an invalid day for the month blocks saving with an inline message',
       (WidgetTester tester) async {
         await pumpForm(tester);
-        await tester.ensureVisible(
-          find.byKey(const Key('field-birthday-month')),
+        await revealBirthday(tester);
+        await pickMonth(tester, 'Feb');
+        await tester.enterText(
+          find.byKey(const Key('field-birthday-year')),
+          '2024',
         );
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('field-birthday-month')));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('Feb').last);
+        await tester.tap(find.byKey(const Key('add-day-checkbox')));
         await tester.pumpAndSettle();
         await tester.enterText(
           find.byKey(const Key('field-birthday-day')),
           '31',
         );
-        await tester.enterText(
-          find.byKey(const Key('field-name')),
-          'Maya Chen',
-        );
-        await tester.pumpAndSettle();
+        await saveWithName(tester, 'Maya Chen');
 
         await tester.tap(find.byKey(const Key('form-save')));
         await tester.pumpAndSettle();
@@ -236,19 +236,16 @@ void main() {
       WidgetTester tester,
     ) async {
       await pumpForm(tester);
-      await tester.ensureVisible(find.byKey(const Key('field-birthday-month')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('field-birthday-month')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Feb').last);
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const Key('field-birthday-day')), '29');
+      await revealBirthday(tester);
+      await pickMonth(tester, 'Feb');
       await tester.enterText(
         find.byKey(const Key('field-birthday-year')),
         '2024',
       );
-      await tester.enterText(find.byKey(const Key('field-name')), 'Maya Chen');
+      await tester.tap(find.byKey(const Key('add-day-checkbox')));
       await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('field-birthday-day')), '29');
+      await saveWithName(tester, 'Maya Chen');
 
       await tester.tap(find.byKey(const Key('form-save')));
       await tester.pumpAndSettle();
@@ -260,18 +257,108 @@ void main() {
       WidgetTester tester,
     ) async {
       await pumpForm(tester);
-      await tester.enterText(find.byKey(const Key('field-name')), 'Maya Chen');
+      await revealBirthday(tester);
+      await pickMonth(tester, 'May');
       await tester.enterText(
         find.byKey(const Key('field-birthday-year')),
         '2099',
       );
-      await tester.pumpAndSettle();
+      await saveWithName(tester, 'Maya Chen');
 
       await tester.tap(find.byKey(const Key('form-save')));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('future'), findsOneWidget);
       expect(find.byKey(const Key('form-save')), findsOneWidget);
+    });
+  });
+
+  group('optional birthday', () {
+    testWidgets('a name-only person saves and shows no birthday line', (
+      WidgetTester tester,
+    ) async {
+      await pumpForm(tester);
+      await saveWithName(tester, 'maya chen');
+      await tester.tap(find.byKey(const Key('form-save')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Maya Chen'), findsOneWidget);
+      expect(find.byKey(const Key('detail-value-Birthday')), findsNothing);
+    });
+
+    testWidgets('a day-less birthday saves and shows month and year', (
+      WidgetTester tester,
+    ) async {
+      await pumpForm(tester);
+      await saveWithName(tester, 'Diego Morales');
+      await revealBirthday(tester);
+      await pickMonth(tester, 'Mar');
+      await tester.enterText(
+        find.byKey(const Key('field-birthday-year')),
+        '1990',
+      );
+      await tester.tap(find.byKey(const Key('form-save')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mar 1990'), findsOneWidget);
+    });
+
+    testWidgets('the Add day checkbox reveals and hides the day field', (
+      WidgetTester tester,
+    ) async {
+      await pumpForm(tester);
+      await revealBirthday(tester);
+
+      expect(find.byKey(const Key('field-birthday-day')), findsNothing);
+      await tester.tap(find.byKey(const Key('add-day-checkbox')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('field-birthday-day')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('add-day-checkbox')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('field-birthday-day')), findsNothing);
+    });
+
+    testWidgets('removing the birthday collapses the editor', (
+      WidgetTester tester,
+    ) async {
+      await pumpForm(tester);
+      await revealBirthday(tester);
+
+      await tester.tap(find.byKey(const Key('remove-birthday')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('add-birthday')), findsOneWidget);
+      expect(find.byKey(const Key('field-birthday-month')), findsNothing);
+    });
+
+    testWidgets('month and year are required once the birthday is revealed', (
+      WidgetTester tester,
+    ) async {
+      await pumpForm(tester);
+      await revealBirthday(tester);
+      await saveWithName(tester, 'Maya Chen');
+      await tester.tap(find.byKey(const Key('form-save')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Month is required'), findsOneWidget);
+      expect(find.text('Year is required'), findsOneWidget);
+    });
+
+    testWidgets('the location field is title-cased live', (
+      WidgetTester tester,
+    ) async {
+      await pumpForm(tester);
+      await tester.enterText(
+        find.byKey(const Key('field-location')),
+        'los angeles',
+      );
+      await tester.pumpAndSettle();
+
+      final location = tester.widget<TextFormField>(
+        find.byKey(const Key('field-location')),
+      );
+      expect(location.controller!.text, 'Los Angeles');
     });
   });
 }

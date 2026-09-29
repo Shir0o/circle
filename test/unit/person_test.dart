@@ -249,4 +249,104 @@ void main() {
       expect(restored.stage, LifeStage.college);
     });
   });
+
+  group('Person without a birthday', () {
+    final refDate = DateTime(2026, 7, 4);
+    final noBirthday = Person(
+      id: 1,
+      name: 'No Birthday',
+      stage: LifeStage.working,
+    );
+
+    test('reports no birthday and produces no dates', () {
+      expect(noBirthday.hasBirthday, isFalse);
+      expect(noBirthday.birthdayLabel, isNull);
+      expect(noBirthday.getAge(referenceDate: refDate), isNull);
+      expect(noBirthday.daysUntilBirthday(referenceDate: refDate), isNull);
+      expect(noBirthday.turnsAge(referenceDate: refDate), isNull);
+    });
+
+    test('round-trips null birthday fields through JSON', () {
+      final restored = Person.fromJson(noBirthday.toJson());
+      expect(restored.hasBirthday, isFalse);
+      expect(restored.bMonth, isNull);
+      expect(restored.bDay, isNull);
+      expect(restored.bYear, isNull);
+    });
+
+    test('fromJson treats missing birthday fields as null', () {
+      final restored = Person.fromJson({
+        'id': 1,
+        'name': 'Test',
+        'stage': 'working',
+      });
+      expect(restored.hasBirthday, isFalse);
+    });
+  });
+
+  group('Person with a day-less birthday', () {
+    final refDate = DateTime(2026, 7, 4);
+    final dayLess = Person(
+      id: 1,
+      name: 'Day Less',
+      stage: LifeStage.working,
+      bMonth: 8,
+      bYear: 1990,
+    );
+
+    test('has a birthday but no countable day', () {
+      expect(dayLess.hasBirthday, isTrue);
+      expect(dayLess.daysUntilBirthday(referenceDate: refDate), isNull);
+    });
+
+    test('derives age from the month when the day is unknown', () {
+      // Born Aug 1990, reference Jul 2026: turns 36 next month -> currently 35.
+      expect(dayLess.getAge(referenceDate: refDate), 35);
+      // Born in a month already passed this year -> full age.
+      final passed = Person(
+        id: 2,
+        name: 'Passed',
+        stage: LifeStage.working,
+        bMonth: 4,
+        bYear: 1990,
+      );
+      expect(passed.getAge(referenceDate: refDate), 36);
+    });
+
+    test('computes the age being turned this year', () {
+      expect(dayLess.turnsAge(referenceDate: refDate), 36);
+    });
+
+    test('round-trips a day-less birthday through JSON', () {
+      final restored = Person.fromJson(dayLess.toJson());
+      expect(restored.bMonth, 8);
+      expect(restored.bYear, 1990);
+      expect(restored.bDay, isNull);
+    });
+
+    test('formats a day-less birthday as month and year', () {
+      expect(dayLess.birthdayLabel, 'Aug 1990');
+    });
+
+    test('formats a full birthday, with the year only when known', () {
+      final full = Person(
+        id: 3,
+        name: 'Full',
+        stage: LifeStage.working,
+        bMonth: 5,
+        bDay: 20,
+        bYear: 2003,
+      );
+      expect(full.birthdayLabel, 'May 20, 2003');
+
+      final noYear = Person(
+        id: 4,
+        name: 'No Year',
+        stage: LifeStage.working,
+        bMonth: 5,
+        bDay: 20,
+      );
+      expect(noYear.birthdayLabel, 'May 20');
+    });
+  });
 }

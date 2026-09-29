@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/life_stage.dart';
 import '../models/month_names.dart';
 import '../models/person.dart';
+import '../models/title_case.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
 import 'profile_screen.dart';
@@ -22,7 +23,9 @@ class _FormScreenState extends State<FormScreen> {
 
   late LifeStage _stage;
   late TextEditingController _nameController;
-  late int _bMonth;
+  int? _bMonth;
+  bool _birthdayExpanded = false;
+  bool _hasDay = false;
   late TextEditingController _bDayController;
   late TextEditingController _bYearController;
   late TextEditingController _yearController;
@@ -45,13 +48,11 @@ class _FormScreenState extends State<FormScreen> {
 
     _stage = p?.stage ?? LifeStage.college;
     _nameController = TextEditingController(text: p?.name ?? '');
-    _bMonth = p?.bMonth ?? 1;
-    _bDayController = TextEditingController(
-      text: p?.bDay != null ? p!.bDay.toString() : '',
-    );
-    _bYearController = TextEditingController(
-      text: p?.bYear != null ? p!.bYear.toString() : '',
-    );
+    _bMonth = p?.bMonth;
+    _birthdayExpanded = p?.hasBirthday ?? false;
+    _hasDay = p?.bDay != null;
+    _bDayController = TextEditingController(text: p?.bDay?.toString() ?? '');
+    _bYearController = TextEditingController(text: p?.bYear?.toString() ?? '');
     _yearController = TextEditingController(text: p?.year ?? '');
     _majorController = TextEditingController(text: p?.major ?? '');
     _schoolController = TextEditingController(text: p?.school ?? '');
@@ -67,11 +68,37 @@ class _FormScreenState extends State<FormScreen> {
     _howKnowController = TextEditingController(text: p?.howKnow ?? '');
     _notesController = TextEditingController(text: p?.notes ?? '');
 
-    _nameController.addListener(_onFormChanged);
+    _nameController.addListener(_onNameChanged);
+    _locationController.addListener(_onLocationChanged);
   }
 
-  void _onFormChanged() {
+  void _onNameChanged() {
+    _applyTitleCase(_nameController);
     if (mounted) setState(() {});
+  }
+
+  void _onLocationChanged() {
+    _applyTitleCase(_locationController);
+  }
+
+  /// Reformats [controller] to title case in place, keeping the caret where it
+  /// was so live editing doesn't jump.
+  void _applyTitleCase(TextEditingController controller) {
+    final formatted = titleCase(controller.text);
+    if (formatted == controller.text) return;
+    final value = controller.value;
+    final max = formatted.length;
+    final selection = value.selection.isValid
+        ? TextSelection(
+            baseOffset: value.selection.baseOffset.clamp(0, max),
+            extentOffset: value.selection.extentOffset.clamp(0, max),
+          )
+        : value.selection;
+    controller.value = value.copyWith(
+      text: formatted,
+      selection: selection,
+      composing: TextRange.empty,
+    );
   }
 
   @override
@@ -109,8 +136,15 @@ class _FormScreenState extends State<FormScreen> {
     final provider = Provider.of<PeopleProvider>(context, listen: false);
 
     final id = widget.person?.id ?? DateTime.now().millisecondsSinceEpoch;
-    final bDay = int.tryParse(_bDayController.text.trim()) ?? 1;
-    final bYear = int.tryParse(_bYearController.text.trim());
+
+    int? bMonth;
+    int? bDay;
+    int? bYear;
+    if (_birthdayExpanded) {
+      bMonth = _bMonth;
+      bYear = int.tryParse(_bYearController.text.trim());
+      bDay = _hasDay ? int.tryParse(_bDayController.text.trim()) : null;
+    }
 
     final interests = _interestsController.text
         .split(',')
@@ -126,9 +160,9 @@ class _FormScreenState extends State<FormScreen> {
 
     final person = Person(
       id: id,
-      name: _nameController.text.trim(),
+      name: titleCase(_nameController.text.trim()),
       stage: _stage,
-      bMonth: _bMonth,
+      bMonth: bMonth,
       bDay: bDay,
       bYear: bYear,
       year: _yearController.text.trim(),
@@ -136,7 +170,7 @@ class _FormScreenState extends State<FormScreen> {
       school: _schoolController.text.trim(),
       grade: _gradeController.text.trim(),
       occupation: _occupationController.text.trim(),
-      location: _locationController.text.trim(),
+      location: titleCase(_locationController.text.trim()),
       interests: interests,
       dietary: dietary,
       howKnow: _howKnowController.text.trim(),
@@ -221,7 +255,10 @@ class _FormScreenState extends State<FormScreen> {
                       const SizedBox(height: 18),
                       _microLabel(tokens, 'Birthday'),
                       const SizedBox(height: 8),
-                      _birthdayRow(tokens),
+                      if (_birthdayExpanded)
+                        _birthdayEditor(tokens)
+                      else
+                        _addBirthdayButton(tokens),
                       const SizedBox(height: 18),
                       ..._stageSpecificFields(tokens),
                       const SizedBox(height: 18),
@@ -538,75 +575,161 @@ class _FormScreenState extends State<FormScreen> {
     );
   }
 
-  Widget _birthdayRow(DesignTokens tokens) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 14,
-          child: DropdownButtonFormField<int>(
-            key: const Key('field-birthday-month'),
-            initialValue: _bMonth,
-            items: List.generate(12, (index) {
-              return DropdownMenuItem(
-                value: index + 1,
-                child: Text(months[index]),
-              );
-            }),
-            onChanged: (val) {
-              if (val != null) setState(() => _bMonth = val);
-            },
-            style: GoogleFonts.nunito(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: tokens.text,
-            ),
-            dropdownColor: tokens.surface,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: tokens.surface,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 13,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(13),
-                borderSide: BorderSide(color: tokens.inputBorder),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(13),
-                borderSide: BorderSide(color: tokens.inputBorder),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(13),
-                borderSide: BorderSide(color: tokens.accent),
-              ),
-            ),
+  Widget _addBirthdayButton(DesignTokens tokens) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: OutlinedButton.icon(
+        key: const Key('add-birthday'),
+        onPressed: () => setState(() => _birthdayExpanded = true),
+        icon: const Icon(Icons.add, size: 18),
+        label: const Text('Add birthday'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: tokens.accent,
+          textStyle: GoogleFonts.nunito(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+          side: BorderSide(color: tokens.chipBorder),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(13),
           ),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 10,
-          child: _field(
+      ),
+    );
+  }
+
+  void _removeBirthday() {
+    setState(() {
+      _birthdayExpanded = false;
+      _bMonth = null;
+      _hasDay = false;
+      _bDayController.clear();
+      _bYearController.clear();
+    });
+  }
+
+  Widget _birthdayEditor(DesignTokens tokens) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(flex: 14, child: _birthdayMonthField(tokens)),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 12,
+              child: _field(
+                key: const Key('field-birthday-year'),
+                controller: _bYearController,
+                hint: 'Year',
+                keyboardType: TextInputType.number,
+                validator: _validateYear,
+              ),
+            ),
+            IconButton(
+              key: const Key('remove-birthday'),
+              onPressed: _removeBirthday,
+              tooltip: 'Remove birthday',
+              icon: Icon(Icons.close, size: 20, color: tokens.muted),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Row(
+          children: [
+            Checkbox(
+              key: const Key('add-day-checkbox'),
+              value: _hasDay,
+              visualDensity: VisualDensity.compact,
+              onChanged: (value) => setState(() {
+                _hasDay = value ?? false;
+                if (!_hasDay) _bDayController.clear();
+              }),
+            ),
+            Text(
+              'Add day',
+              style: GoogleFonts.nunito(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+                color: tokens.muted,
+              ),
+            ),
+          ],
+        ),
+        if (_hasDay) ...[
+          const SizedBox(height: 8),
+          _field(
             key: const Key('field-birthday-day'),
             controller: _bDayController,
             hint: 'Day',
             keyboardType: TextInputType.number,
             validator: _validateDay,
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 12,
-          child: _field(
-            key: const Key('field-birthday-year'),
-            controller: _bYearController,
-            hint: 'Year',
-            keyboardType: TextInputType.number,
-            validator: _validateYear,
-          ),
-        ),
+        ],
       ],
+    );
+  }
+
+  Widget _birthdayMonthField(DesignTokens tokens) {
+    return DropdownButtonFormField<int>(
+      key: const Key('field-birthday-month'),
+      initialValue: _bMonth,
+      hint: Text(
+        'Month',
+        style: GoogleFonts.nunito(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w500,
+          color: tokens.faint2,
+        ),
+      ),
+      items: List.generate(12, (index) {
+        return DropdownMenuItem(value: index + 1, child: Text(months[index]));
+      }),
+      onChanged: (val) {
+        if (val != null) setState(() => _bMonth = val);
+      },
+      validator: (val) => val == null ? 'Month is required' : null,
+      style: GoogleFonts.nunito(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: tokens.text,
+      ),
+      dropdownColor: tokens.surface,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: tokens.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
+        ),
+        errorStyle: GoogleFonts.nunito(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: tokens.danger,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.inputBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.inputBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.accent),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(13),
+          borderSide: BorderSide(color: tokens.danger),
+        ),
+      ),
     );
   }
 
@@ -615,9 +738,11 @@ class _FormScreenState extends State<FormScreen> {
     if (text.isEmpty) return 'Day is required';
     final day = int.tryParse(text);
     if (day == null) return 'Day must be a number';
+    final month = _bMonth;
     final yearText = _bYearController.text.trim();
     final year = yearText.isEmpty ? null : int.tryParse(yearText);
-    if (day < 1 || day > _daysInMonth(_bMonth, year)) {
+    final maxDay = month == null ? 31 : _daysInMonth(month, year);
+    if (day < 1 || day > maxDay) {
       return 'Invalid day for this month';
     }
     return null;
@@ -625,7 +750,7 @@ class _FormScreenState extends State<FormScreen> {
 
   String? _validateYear(String? val) {
     final text = val?.trim() ?? '';
-    if (text.isEmpty) return null;
+    if (text.isEmpty) return 'Year is required';
     final year = int.tryParse(text);
     if (year == null) return 'Year must be a number';
     final today = Provider.of<PeopleProvider>(context, listen: false).today;
