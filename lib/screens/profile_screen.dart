@@ -6,7 +6,6 @@ import '../models/month_names.dart';
 import '../models/person.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
-import '../widgets/app_chrome.dart';
 import 'form_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -65,7 +64,7 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const AppTopRow(),
+              const SizedBox(height: 44),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 22),
                 child: Column(

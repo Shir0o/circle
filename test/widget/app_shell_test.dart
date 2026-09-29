@@ -133,7 +133,7 @@ void main() {
     expect(find.byKey(const Key('circle-tab-bar')), findsNothing);
   });
 
-  testWidgets('theme toggle is reachable on every screen and persists', (
+  testWidgets('theme follows the system with no manual toggle', (
     WidgetTester tester,
   ) async {
     final people = [
@@ -144,32 +144,13 @@ void main() {
     await tester.pumpWidget(CircleApp(clock: clock, prefs: prefs));
     await tester.pumpAndSettle();
 
-    // Shell (covers Directory / Birthdays / Overview tabs): light shows ☾.
-    expect(find.byKey(const Key('theme-toggle')), findsOneWidget);
-    expect(find.text('☾'), findsOneWidget);
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(app.themeMode, ThemeMode.system);
+    expect(find.byKey(const Key('theme-toggle')), findsNothing);
 
-    // Toggle to dark.
-    await tester.tap(find.byKey(const Key('theme-toggle')));
-    await tester.pumpAndSettle();
-    expect(find.text('☀'), findsOneWidget);
-    expect(prefs.getBool('circle_theme_v1'), isTrue);
-
-    // Reachable on Profile.
     await tester.tap(find.text('Maya Chen'));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('theme-toggle')), findsOneWidget);
-
-    // Back, then reachable on the form.
-    await tester.tap(find.byKey(const Key('profile-back')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('theme-toggle')), findsOneWidget);
-
-    // Persists across restart with the same storage.
-    await tester.pumpWidget(CircleApp(clock: clock, prefs: prefs));
-    await tester.pumpAndSettle();
-    expect(find.text('☀'), findsOneWidget);
+    expect(find.byKey(const Key('theme-toggle')), findsNothing);
   });
 
   testWidgets('shell wires a tab-switch mechanism to the Directory screen', (

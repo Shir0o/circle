@@ -21,17 +21,13 @@ class CircleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<PeopleProvider>(
       create: (_) => PeopleProvider(clock: clock, prefs: prefs),
-      child: Consumer<PeopleProvider>(
-        builder: (context, provider, child) {
-          return MaterialApp(
-            title: 'Circle',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: provider.themeMode,
-            home: const MainScreen(),
-          );
-        },
+      child: MaterialApp(
+        title: 'Circle',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        home: const MainScreen(),
       ),
     );
   }

@@ -6,7 +6,6 @@ import '../models/month_names.dart';
 import '../models/person.dart';
 import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
-import '../widgets/app_chrome.dart';
 import 'profile_screen.dart';
 
 class FormScreen extends StatefulWidget {
@@ -200,7 +199,7 @@ class _FormScreenState extends State<FormScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const AppTopRow(),
+            const SizedBox(height: 44),
             _header(tokens, isEditing),
             Expanded(
               child: Form(
