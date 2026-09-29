@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/Shir0o/circle/compare/v1.1.0...v1.2.0) (2026-09-29)
+
+
+### Features
+
+* follow system theme and remove manual toggle ([#30](https://github.com/Shir0o/circle/issues/30)) ([0fec6f0](https://github.com/Shir0o/circle/commit/0fec6f07cf7936b89a42d7e93db0feca4eac5252))
+* optional birthdays, name-only add form, title-cased name and location ([#32](https://github.com/Shir0o/circle/issues/32)) ([#33](https://github.com/Shir0o/circle/issues/33)) ([c5cd39c](https://github.com/Shir0o/circle/commit/c5cd39c16de385b615b112a96bfec179c28d1dc2))
+
 ## [1.1.0](https://github.com/Shir0o/circle/compare/v1.0.0...v1.1.0) (2026-09-28)
 
 
