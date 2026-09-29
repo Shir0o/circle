@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/design_tokens.dart';
-import '../widgets/app_chrome.dart';
 import 'directory_screen.dart';
 import 'birthdays_screen.dart';
 import 'overview_screen.dart';
@@ -47,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
         bottom: false,
         child: Column(
           children: [
-            const AppTopRow(),
+            const SizedBox(height: 44),
             Expanded(
               child: MediaQuery.removePadding(
                 context: context,

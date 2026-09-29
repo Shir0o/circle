@@ -202,14 +202,14 @@ void main() {
   testWidgets('interests use warm tags and dietary use mint tags in dark', (
     WidgetTester tester,
   ) async {
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+
     SharedPreferences.setMockInitialValues({
       'circle_people_v1': jsonEncode([collegePerson().toJson()]),
     });
     final prefs = await SharedPreferences.getInstance();
     await tester.pumpWidget(CircleApp(clock: clock, prefs: prefs));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('theme-toggle')));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Maya Chen'));

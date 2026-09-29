@@ -8,7 +8,6 @@ import '../models/person.dart';
 
 class PeopleProvider extends ChangeNotifier {
   static const String _storageKey = 'circle_people_v1';
-  static const String _themeKey = 'circle_theme_v1';
   static const String _backupKey = 'circle_people_v1_backup';
 
   final Clock _clock;
@@ -17,15 +16,12 @@ class PeopleProvider extends ChangeNotifier {
   List<Person> _people = [];
   String _searchQuery = '';
   String _stageFilter = 'all';
-  ThemeMode _themeMode = ThemeMode.light;
   Person? _selectedPerson;
   bool _isInitialized = false;
 
   List<Person> get people => _people;
   String get searchQuery => _searchQuery;
   String get stageFilter => _stageFilter;
-  ThemeMode get themeMode => _themeMode;
-  bool get isDarkMode => _themeMode == ThemeMode.dark;
   Person? get selectedPerson => _selectedPerson;
   bool get isInitialized => _isInitialized;
   DateTime get today => _clock.today;
@@ -39,8 +35,6 @@ class PeopleProvider extends ChangeNotifier {
 
   Future<void> init() async {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
-    final isDark = prefs.getBool(_themeKey) ?? false;
-    _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
 
     final jsonString = prefs.getString(_storageKey);
     if (jsonString != null && jsonString.isNotEmpty) {
@@ -71,15 +65,6 @@ class PeopleProvider extends ChangeNotifier {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
     final jsonString = jsonEncode(_people.map((p) => p.toJson()).toList());
     await prefs.setString(_storageKey, jsonString);
-  }
-
-  Future<void> toggleTheme() async {
-    _themeMode = _themeMode == ThemeMode.light
-        ? ThemeMode.dark
-        : ThemeMode.light;
-    final prefs = _prefs ?? await SharedPreferences.getInstance();
-    await prefs.setBool(_themeKey, _themeMode == ThemeMode.dark);
-    notifyListeners();
   }
 
   void setSearchQuery(String query) {
