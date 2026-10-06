@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/Shir0o/circle/compare/v1.2.0...v1.2.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **ci:** format Play Store release notes without leading spaces or excess blank lines ([#34](https://github.com/Shir0o/circle/issues/34)) ([716d7a8](https://github.com/Shir0o/circle/commit/716d7a86edc30fdb36e239fb8d9ca6c6ac398c96))
+
 ## [1.2.0](https://github.com/Shir0o/circle/compare/v1.1.0...v1.2.0) (2026-09-29)
 
 
