@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.1](https://github.com/Shir0o/circle/compare/v1.2.0...v1.2.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* **ci:** format Play Store release notes without leading spaces or excess blank lines ([#34](https://github.com/Shir0o/circle/issues/34)) ([716d7a8](https://github.com/Shir0o/circle/commit/716d7a86edc30fdb36e239fb8d9ca6c6ac398c96))
+* **ci:** pin action SHAs to immutable hashes ([#3](https://github.com/Shir0o/circle/issues/3)) ([#39](https://github.com/Shir0o/circle/issues/39)) ([1c8103e](https://github.com/Shir0o/circle/commit/1c8103ebccb97cce0b10a8da242ab68a1e8afa31))
+* **ui:** audit and improve accessibility, contrast, and scaling ([#43](https://github.com/Shir0o/circle/issues/43)) ([d4527e8](https://github.com/Shir0o/circle/commit/d4527e89f8fa1b8043341016dfbf261e09ddcc4a))
+
 ## [1.2.0](https://github.com/Shir0o/circle/compare/v1.1.0...v1.2.0) (2026-09-29)
 
 
