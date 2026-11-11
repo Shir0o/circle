@@ -65,37 +65,43 @@ class DirectoryScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: tokens.accent,
-                      boxShadow: [
-                        BoxShadow(
-                          color: tokens.accent.withValues(alpha: 0.7),
-                          blurRadius: 18,
-                          spreadRadius: -6,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      shape: const CircleBorder(),
-                      child: InkWell(
-                        key: const Key('add-person-button'),
-                        customBorder: const CircleBorder(),
-                        onTap: onOpenAdd,
-                        child: SizedBox(
-                          width: 44,
-                          height: 44,
-                          child: Center(
-                            child: Text(
-                              '+',
-                              style: GoogleFonts.nunito(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w700,
-                                height: 1,
-                                color: Colors.white,
+                  Semantics(
+                    label: 'Add person',
+                    button: true,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: tokens.accent,
+                        boxShadow: [
+                          BoxShadow(
+                            color: tokens.accent.withValues(alpha: 0.7),
+                            blurRadius: 18,
+                            spreadRadius: -6,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          key: const Key('add-person-button'),
+                          customBorder: const CircleBorder(),
+                          onTap: onOpenAdd,
+                          child: SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Center(
+                              // The icon is decorative: the button is named
+                              // by the Semantics wrapper above. Using an Icon
+                              // keeps the glyph inside the 48px circle at
+                              // large text scales.
+                              child: const ExcludeSemantics(
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
                               ),
                             ),
                           ),

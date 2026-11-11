@@ -117,7 +117,9 @@ void main() {
     final bdays = tester.widget<Text>(
       find.byKey(const Key('overview-birthdays')),
     );
-    expect(bdays.style!.color, DesignTokens.light.accent);
+    // 30px accent on the pale accent tint only reaches 2.5:1 (WCAG AA wants
+    // 3:1 for large text), so the value uses the deeper accent tone.
+    expect(bdays.style!.color, DesignTokens.light.accentDeep);
 
     final label = tester.widget<Text>(find.text('birthdays this month'));
     expect(label.style!.color, DesignTokens.light.accentDeep);

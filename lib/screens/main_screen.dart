@@ -46,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
         bottom: false,
         child: Column(
           children: [
-            const SizedBox(height: 44),
+            const SizedBox(height: 8),
             Expanded(
               child: MediaQuery.removePadding(
                 context: context,
@@ -105,35 +105,53 @@ class _CircleTabBar extends StatelessWidget {
               final label = entry.value;
               final isAdd = index == 3;
               final active = !isAdd && index == currentIndex;
-              final color = active ? tokens.accent : tokens.tabInactive;
+              final color = active ? tokens.accentDeep : tokens.tabInactive;
 
               return Expanded(
-                child: GestureDetector(
-                  key: Key('tab-${label.toLowerCase()}'),
-                  behavior: HitTestBehavior.opaque,
+                child: Semantics(
+                  button: true,
+                  selected: active,
+                  label: label,
+                  // The label above names the tab, so the visual label is
+                  // hidden from assistive tech to avoid a duplicate reading.
+                  excludeSemantics: true,
                   onTap: () => onSelect(index),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        key: Key('tab-dot-${label.toLowerCase()}'),
-                        width: 5,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: active ? tokens.accent : Colors.transparent,
-                          shape: BoxShape.circle,
+                  child: GestureDetector(
+                    key: Key('tab-${label.toLowerCase()}'),
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onSelect(index),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          key: Key('tab-dot-${label.toLowerCase()}'),
+                          width: 5,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: active ? tokens.accent : Colors.transparent,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        label,
-                        style: GoogleFonts.nunito(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w800,
-                          color: color,
+                        const SizedBox(height: 5),
+                        // Keep the label on one line at large text scales and
+                        // shrink it rather than overflowing the fixed bar.
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: GoogleFonts.nunito(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                                color: color,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
