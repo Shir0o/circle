@@ -50,7 +50,7 @@ class OverviewScreen extends StatelessWidget {
                       key: const Key('overview-birthday-tile'),
                       valueKey: const Key('overview-birthdays'),
                       value: '${stats.birthdaysThisMonth}',
-                      valueColor: tokens.accent,
+                      valueColor: tokens.accentDeep,
                       label: 'birthdays this month',
                       labelColor: tokens.accentDeep,
                       bg: tokens.accentBg,
