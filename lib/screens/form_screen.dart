@@ -397,22 +397,26 @@ class _FormScreenState extends State<FormScreen> {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        Text(
-          label.toUpperCase(),
-          style: GoogleFonts.nunito(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.6,
-            color: tokens.faint,
+        Flexible(
+          child: Text(
+            label.toUpperCase(),
+            style: GoogleFonts.nunito(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.6,
+              color: tokens.faint,
+            ),
           ),
         ),
         if (suffix != null)
-          Text(
-            ' $suffix',
-            style: GoogleFonts.nunito(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: tokens.faint2,
+          Flexible(
+            child: Text(
+              ' $suffix',
+              style: GoogleFonts.nunito(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: tokens.faint2,
+              ),
             ),
           ),
       ],
