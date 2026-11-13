@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/Shir0o/circle/compare/v1.2.1...v1.2.2) (2026-11-13)
+
+
+### Bug Fixes
+
+* **ui:** wrap person card stage badge and fix form section overflow ([#44](https://github.com/Shir0o/circle/issues/44)) ([6c5d956](https://github.com/Shir0o/circle/commit/6c5d9568caede9e8eba1307aae01077e6a47921a))
+
 ## [1.2.1](https://github.com/Shir0o/circle/compare/v1.2.0...v1.2.1) (2026-11-11)
 
 
