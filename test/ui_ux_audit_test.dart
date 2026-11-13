@@ -8,6 +8,7 @@ import 'package:circle/main.dart';
 import 'package:circle/models/clock.dart';
 import 'package:circle/models/life_stage.dart';
 import 'package:circle/models/person.dart';
+import 'package:circle/screens/form_screen.dart';
 import 'package:circle/screens/main_screen.dart';
 
 /// UI/UX audit harness for the Circle app.
@@ -192,6 +193,17 @@ void main() {
 
           _expectNoOverflow(tester, variant.name);
 
+          // The stage badge wraps to its own run instead of starving the name:
+          // the name must keep a measurable width on every profile.
+          final personName = find.text('Diego Morales');
+          expect(personName, findsOneWidget);
+          expect(
+            tester.getSize(personName).width,
+            greaterThan(50),
+            reason:
+                '[$variant.name] person name collapsed or was starved of space',
+          );
+
           await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
           await expectLater(tester, meetsGuideline(textContrastGuideline));
 
@@ -210,6 +222,11 @@ void main() {
     testWidgets('${variant.name}: primary navigation click-through', (
       tester,
     ) async {
+      // Intermediate screens are captured from a single canonical profile so
+      // the files do not churn once per variant.
+      final captureStep =
+          autoUpdateGoldenFiles && variant.name == 'phone_light';
+
       await _pumpCircle(tester, variant);
 
       // Birthdays is the first non-default tab in the shell: tapping it
@@ -217,17 +234,40 @@ void main() {
       await tester.tap(find.byKey(const Key('tab-birthdays')));
       await tester.pumpAndSettle();
 
+      _expectNoOverflow(tester, '${variant.name}_step2_birthdays');
       expect(find.text('Next up in your circle'), findsOneWidget);
       expect(find.byKey(const Key('circle-tab-bar')), findsOneWidget);
-      _expectNoOverflow(tester, '${variant.name}_step2');
-
-      // The golden is a single canonical capture: take it from the base
-      // phone-light profile so the file does not churn with every variant.
       await _maybeGolden(
         tester,
-        'circle_step2_action.png',
-        enabled: autoUpdateGoldenFiles && variant.name == 'phone_light',
+        'circle_step2_birthdays.png',
+        enabled: captureStep,
       );
+
+      await tester.tap(find.byKey(const Key('tab-overview')));
+      await tester.pumpAndSettle();
+
+      _expectNoOverflow(tester, '${variant.name}_step3_overview');
+      expect(find.text('Your circle'), findsOneWidget);
+      await _maybeGolden(
+        tester,
+        'circle_step3_overview.png',
+        enabled: captureStep,
+      );
+
+      // Add is a pushed route rather than a tab, so it takes over the shell.
+      await tester.tap(find.byKey(const Key('tab-add')));
+      await tester.pumpAndSettle();
+
+      _expectNoOverflow(tester, '${variant.name}_step4_add');
+      expect(find.byType(FormScreen), findsOneWidget);
+      await _maybeGolden(tester, 'circle_step4_add.png', enabled: captureStep);
+
+      // Cancelling the form returns to the tab that was active before.
+      await tester.tap(find.byKey(const Key('form-cancel')));
+      await tester.pumpAndSettle();
+
+      _expectNoOverflow(tester, '${variant.name}_step4_back');
+      expect(find.text('Your circle'), findsOneWidget);
     });
   }
 }

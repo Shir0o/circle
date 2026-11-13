@@ -415,20 +415,19 @@ class _PersonCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 7,
+                      runSpacing: 4,
                       children: [
-                        Flexible(
-                          child: Text(
-                            person.name,
-                            style: GoogleFonts.nunito(
-                              fontSize: 15.5,
-                              fontWeight: FontWeight.w800,
-                              color: tokens.text,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          person.name,
+                          style: GoogleFonts.nunito(
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w800,
+                            color: tokens.text,
                           ),
                         ),
-                        const SizedBox(width: 7),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
