@@ -10,6 +10,7 @@ import 'package:circle/models/life_stage.dart';
 import 'package:circle/models/person.dart';
 import 'package:circle/screens/form_screen.dart';
 import 'package:circle/screens/main_screen.dart';
+import 'package:circle/screens/profile_screen.dart';
 
 /// UI/UX audit harness for the Circle app.
 ///
@@ -175,6 +176,29 @@ Future<void> _maybeGolden(
   );
 }
 
+/// Captures a step screenshot of a secondary screen.
+///
+/// The canonical file name is reserved for the `phone_light` profile; every
+/// other profile gets its name appended (for example
+/// `circle_step2_birthdays_phone_dark.png`) so the dark and large-font captures
+/// do not overwrite the baseline. A plain `flutter test` run writes nothing.
+Future<void> _maybeStepGolden(
+  WidgetTester tester,
+  String file, {
+  required _Variant variant,
+}) async {
+  if (!autoUpdateGoldenFiles) return;
+  final suffix = variant.name == 'phone_light' ? '' : '_${variant.name}';
+  final name = file.replaceFirst('.png', '$suffix.png');
+  await _maybeGolden(tester, name, enabled: true);
+}
+
+/// Runs the two accessibility guidelines the audit treats as hard gates.
+Future<void> _expectAccessibilityGuidelines(WidgetTester tester) async {
+  await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+  await expectLater(tester, meetsGuideline(textContrastGuideline));
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -222,52 +246,99 @@ void main() {
     testWidgets('${variant.name}: primary navigation click-through', (
       tester,
     ) async {
-      // Intermediate screens are captured from a single canonical profile so
-      // the files do not churn once per variant.
-      final captureStep =
-          autoUpdateGoldenFiles && variant.name == 'phone_light';
+      final semantics = tester.ensureSemantics();
 
-      await _pumpCircle(tester, variant);
+      try {
+        await _pumpCircle(tester, variant);
 
-      // Birthdays is the first non-default tab in the shell: tapping it
-      // exercises the app's primary navigation path.
-      await tester.tap(find.byKey(const Key('tab-birthdays')));
-      await tester.pumpAndSettle();
+        // Birthdays is the first non-default tab in the shell: tapping it
+        // exercises the app's primary navigation path.
+        await tester.tap(find.byKey(const Key('tab-birthdays')));
+        await tester.pumpAndSettle();
 
-      _expectNoOverflow(tester, '${variant.name}_step2_birthdays');
-      expect(find.text('Next up in your circle'), findsOneWidget);
-      expect(find.byKey(const Key('circle-tab-bar')), findsOneWidget);
-      await _maybeGolden(
-        tester,
-        'circle_step2_birthdays.png',
-        enabled: captureStep,
-      );
+        _expectNoOverflow(tester, '${variant.name}_step2_birthdays');
+        expect(find.text('Next up in your circle'), findsOneWidget);
+        expect(find.byKey(const Key('circle-tab-bar')), findsOneWidget);
+        await _expectAccessibilityGuidelines(tester);
+        await _maybeStepGolden(
+          tester,
+          'circle_step2_birthdays.png',
+          variant: variant,
+        );
 
-      await tester.tap(find.byKey(const Key('tab-overview')));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('tab-overview')));
+        await tester.pumpAndSettle();
 
-      _expectNoOverflow(tester, '${variant.name}_step3_overview');
-      expect(find.text('Your circle'), findsOneWidget);
-      await _maybeGolden(
-        tester,
-        'circle_step3_overview.png',
-        enabled: captureStep,
-      );
+        _expectNoOverflow(tester, '${variant.name}_step3_overview');
+        expect(find.text('Your circle'), findsOneWidget);
+        await _expectAccessibilityGuidelines(tester);
+        await _maybeStepGolden(
+          tester,
+          'circle_step3_overview.png',
+          variant: variant,
+        );
 
-      // Add is a pushed route rather than a tab, so it takes over the shell.
-      await tester.tap(find.byKey(const Key('tab-add')));
-      await tester.pumpAndSettle();
+        // Add is a pushed route rather than a tab, so it takes over the shell.
+        await tester.tap(find.byKey(const Key('tab-add')));
+        await tester.pumpAndSettle();
 
-      _expectNoOverflow(tester, '${variant.name}_step4_add');
-      expect(find.byType(FormScreen), findsOneWidget);
-      await _maybeGolden(tester, 'circle_step4_add.png', enabled: captureStep);
+        _expectNoOverflow(tester, '${variant.name}_step4_add');
+        expect(find.byType(FormScreen), findsOneWidget);
+        await _expectAccessibilityGuidelines(tester);
+        await _maybeStepGolden(
+          tester,
+          'circle_step4_add.png',
+          variant: variant,
+        );
 
-      // Cancelling the form returns to the tab that was active before.
-      await tester.tap(find.byKey(const Key('form-cancel')));
-      await tester.pumpAndSettle();
+        // Cancelling the form returns to the tab that was active before.
+        await tester.tap(find.byKey(const Key('form-cancel')));
+        await tester.pumpAndSettle();
 
-      _expectNoOverflow(tester, '${variant.name}_step4_back');
-      expect(find.text('Your circle'), findsOneWidget);
+        _expectNoOverflow(tester, '${variant.name}_step4_back');
+        expect(find.text('Your circle'), findsOneWidget);
+
+        // A person row is the second navigation path into a pushed route:
+        // directory -> profile. Scroll it into view first so the tap works at
+        // the compact 320x568 profile too.
+        await tester.tap(find.byKey(const Key('tab-directory')));
+        await tester.pumpAndSettle();
+
+        _expectNoOverflow(tester, '${variant.name}_step5_directory');
+        final diego = find.text('Diego Morales');
+        expect(diego, findsOneWidget);
+        await tester.ensureVisible(diego);
+        await tester.pumpAndSettle();
+        await tester.tap(diego);
+        await tester.pumpAndSettle();
+
+        _expectNoOverflow(tester, '${variant.name}_step5_profile');
+        expect(find.byType(ProfileScreen), findsOneWidget);
+        expect(find.text('Diego Morales'), findsOneWidget);
+        expect(
+          find.byKey(const Key('detail-value-Occupation')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('circle-tab-bar')), findsNothing);
+
+        await _expectAccessibilityGuidelines(tester);
+        await _maybeStepGolden(
+          tester,
+          'circle_step5_profile.png',
+          variant: variant,
+        );
+
+        // Back goes to the directory, not to a stale tab.
+        await tester.tap(find.byKey(const Key('profile-back')));
+        await tester.pumpAndSettle();
+
+        _expectNoOverflow(tester, '${variant.name}_step5_back');
+        expect(find.text('Circle'), findsOneWidget);
+        expect(find.byKey(const Key('circle-tab-bar')), findsOneWidget);
+      } finally {
+        // Must be disposed before the end-of-test verifications run.
+        semantics.dispose();
+      }
     });
   }
 }

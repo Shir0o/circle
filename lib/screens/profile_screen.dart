@@ -149,37 +149,46 @@ class ProfileScreen extends StatelessWidget {
   ) {
     return Row(
       children: [
-        InkWell(
-          key: const Key('profile-back'),
-          onTap: () => Navigator.pop(context),
-          borderRadius: BorderRadius.circular(999),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-            child: Row(
-              children: [
-                Text(
-                  '‹',
-                  style: GoogleFonts.nunito(
-                    fontSize: 22,
-                    height: 1,
-                    fontWeight: FontWeight.w600,
-                    color: tokens.muted,
-                  ),
+        Flexible(
+          child: InkWell(
+            key: const Key('profile-back'),
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(999),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '‹',
+                      style: GoogleFonts.nunito(
+                        fontSize: 22,
+                        height: 1,
+                        fontWeight: FontWeight.w600,
+                        color: tokens.muted,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        'People',
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.nunito(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: tokens.muted,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  'People',
-                  style: GoogleFonts.nunito(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: tokens.muted,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
-        const Spacer(),
+        const SizedBox(width: 8),
         Material(
           color: tokens.accentBg,
           shape: RoundedRectangleBorder(
@@ -196,14 +205,21 @@ class ProfileScreen extends StatelessWidget {
                 ),
               );
             },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                'Edit',
-                style: GoogleFonts.nunito(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: tokens.accent,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    'Edit',
+                    style: GoogleFonts.nunito(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      // Deep accent clears the 4.5:1 floor on the tinted pill.
+                      color: tokens.accentDeep,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -265,12 +281,16 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Text(
-                '${meta.label} · ${age != null ? '$age yrs' : '—'}',
-                style: GoogleFonts.nunito(
-                  color: meta.color,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
+              Flexible(
+                child: Text(
+                  '${meta.label} · ${age != null ? '$age yrs' : '—'}',
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.nunito(
+                    color: meta.color,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -293,47 +313,90 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _detailsCard(DesignTokens tokens, List<(String, String)> rows) {
-    return Container(
-      decoration: BoxDecoration(
-        color: tokens.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: tokens.border, width: 1),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // A long label and a long value cannot share one line on a compact
+        // screen, especially with enlarged text: the value gets squeezed into
+        // a one-character column. Stack them in that case.
+        final textScaler = MediaQuery.textScalerOf(context);
+        final stackLabel =
+            constraints.maxWidth < 330 || textScaler.scale(14) > 18;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: tokens.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: tokens.border, width: 1),
+          ),
+          child: Column(
+            children: [
+              for (var i = 0; i < rows.length; i++) ...[
+                if (i > 0) Container(height: 1, color: tokens.divider),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 13,
+                  ),
+                  child: stackLabel
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _detailLabel(tokens, rows[i].$1),
+                            const SizedBox(height: 4),
+                            _detailValue(
+                              tokens,
+                              rows[i],
+                              textAlign: TextAlign.left,
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            _detailLabel(tokens, rows[i].$1),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _detailValue(
+                                tokens,
+                                rows[i],
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _detailLabel(DesignTokens tokens, String label) {
+    return Text(
+      label.toUpperCase(),
+      style: GoogleFonts.nunito(
+        fontSize: 12.5,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.625,
+        color: tokens.faint,
       ),
-      child: Column(
-        children: [
-          for (var i = 0; i < rows.length; i++) ...[
-            if (i > 0) Container(height: 1, color: tokens.divider),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-              child: Row(
-                children: [
-                  Text(
-                    rows[i].$1.toUpperCase(),
-                    style: GoogleFonts.nunito(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.625,
-                      color: tokens.faint,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      key: Key('detail-value-${rows[i].$1}'),
-                      rows[i].$2,
-                      textAlign: TextAlign.right,
-                      style: GoogleFonts.nunito(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: tokens.text,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
+    );
+  }
+
+  Widget _detailValue(
+    DesignTokens tokens,
+    (String, String) row, {
+    required TextAlign textAlign,
+  }) {
+    return Text(
+      key: Key('detail-value-${row.$1}'),
+      row.$2,
+      textAlign: textAlign,
+      style: GoogleFonts.nunito(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: tokens.text,
       ),
     );
   }

@@ -139,6 +139,27 @@ void main() {
     expect(find.text('OCCUPATION'), findsNothing);
   });
 
+  testWidgets('compact profile stacks detail labels above their values', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await openProfile(tester, collegePerson());
+
+    final label = tester.getRect(find.text('MAJOR'));
+    final value = tester.getRect(find.byKey(const Key('detail-value-Major')));
+
+    // The value sits on its own left-aligned line under the label rather than
+    // collapsing into a one-character column beside it.
+    expect(value.top, greaterThanOrEqualTo(label.bottom));
+    expect(value.left, closeTo(label.left, 0.5));
+    expect(value.width, greaterThan(50));
+  });
+
   testWidgets('working rows show Occupation', (WidgetTester tester) async {
     await openProfile(
       tester,

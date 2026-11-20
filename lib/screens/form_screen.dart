@@ -326,52 +326,99 @@ class _FormScreenState extends State<FormScreen> {
   Widget _header(DesignTokens tokens, bool isEditing) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 6, 12, 4),
-      child: Row(
-        children: [
-          InkWell(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // On compact widths or enlarged text the action labels dominate the
+          // row and starve the title into a one-character column. Stacking the
+          // actions above a full-width title keeps both readable.
+          final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
+          final stacked = constraints.maxWidth < 360 || textScale > 1.25;
+
+          final cancel = InkWell(
             key: const Key('form-cancel'),
             onTap: () => Navigator.pop(context),
             borderRadius: BorderRadius.circular(999),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.nunito(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: tokens.muted,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.nunito(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: tokens.muted,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: Text(
-              isEditing ? 'Edit person' : 'Add person',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                color: tokens.text,
-              ),
-            ),
-          ),
-          InkWell(
+          );
+
+          final save = InkWell(
             key: const Key('form-save'),
             onTap: _save,
             borderRadius: BorderRadius.circular(999),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-              child: Text(
-                'Save',
-                style: GoogleFonts.nunito(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  color: tokens.accent,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    'Save',
+                    style: GoogleFonts.nunito(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      // Deep accent keeps the label above the 4.5:1 contrast
+                      // floor on the cream chrome; plain accent is only ~2.7:1.
+                      color: tokens.accentDeep,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          );
+
+          final title = Text(
+            isEditing ? 'Edit person' : 'Add person',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+              color: tokens.text,
+            ),
+          );
+
+          if (!stacked) {
+            return Row(
+              children: [
+                cancel,
+                Expanded(child: title),
+                save,
+              ],
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [cancel, save],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: title,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -539,43 +586,89 @@ class _FormScreenState extends State<FormScreen> {
   }
 
   Widget _stageSelector(DesignTokens tokens) {
-    return Row(
-      children: LifeStage.values.map((stage) {
-        final isActive = _stage == stage;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              right: stage == LifeStage.values.last ? 0 : 6,
-            ),
-            child: InkWell(
-              key: Key('stage-segment-${stage.serialized}'),
-              onTap: () => setState(() => _stage = stage),
-              borderRadius: BorderRadius.circular(11),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: isActive ? stage.avatarBg : tokens.surface,
-                  borderRadius: BorderRadius.circular(11),
-                  border: Border.all(
-                    color: isActive ? stage.avatarBg : tokens.chipBorder,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    stage.label,
-                    style: GoogleFonts.nunito(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: isActive ? Colors.white : tokens.chipText,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stages = LifeStage.values;
+        const gap = 6.0;
+        final perPill =
+            (constraints.maxWidth - gap * (stages.length - 1)) / stages.length;
+        final textScale = MediaQuery.textScalerOf(context).scale(12) / 12;
+        // Under ~92px a stage label like "College" wraps to a second line.
+        // Switch to a clean 2x2 grid there (and whenever text is enlarged).
+        final useGrid = perPill < 92 || textScale > 1.15;
+
+        if (!useGrid) {
+          return Row(
+            children: [
+              for (var i = 0; i < stages.length; i++)
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: i == stages.length - 1 ? 0 : gap,
                     ),
+                    child: _stagePill(tokens, stages[i]),
                   ),
                 ),
-              ),
+            ],
+          );
+        }
+
+        return Column(
+          children: [
+            Row(
+              children: [
+                Expanded(child: _stagePill(tokens, stages[0])),
+                const SizedBox(width: 8),
+                Expanded(child: _stagePill(tokens, stages[1])),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: _stagePill(tokens, stages[2])),
+                const SizedBox(width: 8),
+                Expanded(child: _stagePill(tokens, stages[3])),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _stagePill(DesignTokens tokens, LifeStage stage) {
+    final isActive = _stage == stage;
+    return InkWell(
+      key: Key('stage-segment-${stage.serialized}'),
+      onTap: () => setState(() => _stage = stage),
+      borderRadius: BorderRadius.circular(11),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+        constraints: const BoxConstraints(minHeight: 48),
+        decoration: BoxDecoration(
+          // A tinted fill with the stage's dark text keeps every
+          // selected segment above 4.5:1; white on the saturated
+          // avatar colour tops out near 4.4:1 (college).
+          color: isActive ? stage.bg : tokens.surface,
+          borderRadius: BorderRadius.circular(11),
+          border: Border.all(
+            color: isActive ? stage.avatarBg : tokens.chipBorder,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            stage.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.nunito(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: isActive ? stage.avatarColor : tokens.chipText,
             ),
           ),
-        );
-      }).toList(),
+        ),
+      ),
     );
   }
 
@@ -588,7 +681,8 @@ class _FormScreenState extends State<FormScreen> {
         icon: const Icon(Icons.add, size: 18),
         label: const Text('Add birthday'),
         style: OutlinedButton.styleFrom(
-          foregroundColor: tokens.accent,
+          // Deep accent clears the 4.5:1 floor that plain accent misses.
+          foregroundColor: tokens.accentDeep,
           textStyle: GoogleFonts.nunito(
             fontSize: 14,
             fontWeight: FontWeight.w800,
