@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/Shir0o/circle/compare/v1.2.2...v1.3.0) (2026-11-20)
+
+
+### Features
+
+* **ui:** add Circle app icon ([#47](https://github.com/Shir0o/circle/issues/47)) ([f4988bb](https://github.com/Shir0o/circle/commit/f4988bb6acabec745c42be3cfbab21e242de4e1b))
+
+
+### Bug Fixes
+
+* **ui:** adapt form and profile layouts for narrow widths ([#49](https://github.com/Shir0o/circle/issues/49)) ([00ceb51](https://github.com/Shir0o/circle/commit/00ceb513d13b2729752aa6e9d76fad7b9d64e8a0))
+
 ## [1.2.2](https://github.com/Shir0o/circle/compare/v1.2.1...v1.2.2) (2026-11-13)
 
 
