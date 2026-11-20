@@ -59,6 +59,59 @@ void main() {
     expect(find.byKey(const Key('delete-person')), findsOneWidget);
   });
 
+  testWidgets('compact header stacks the title below the action row', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await pumpForm(tester);
+
+    final cancel = tester.getRect(find.byKey(const Key('form-cancel')));
+    final save = tester.getRect(find.byKey(const Key('form-save')));
+    final title = tester.getRect(find.text('Add person'));
+
+    // Actions share the top row; the title gets a full row beneath them
+    // instead of being squeezed into a one-character column between them.
+    expect(cancel.bottom, lessThanOrEqualTo(title.top));
+    expect(save.bottom, lessThanOrEqualTo(title.top));
+    expect(title.width, greaterThan(150));
+    expect(title.height, lessThan(60));
+  });
+
+  testWidgets('stage pills switch to a 2x2 grid when labels would wrap', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await pumpForm(tester);
+
+    final kids = tester.getRect(find.byKey(const Key('stage-segment-child')));
+    final teens = tester.getRect(find.byKey(const Key('stage-segment-teen')));
+    final college = tester.getRect(
+      find.byKey(const Key('stage-segment-college')),
+    );
+    final working = tester.getRect(
+      find.byKey(const Key('stage-segment-working')),
+    );
+
+    // Two rows of two pills, each wide enough to keep its label on one line.
+    expect(teens.top, closeTo(kids.top, 0.5));
+    expect(college.top, greaterThan(kids.bottom));
+    expect(working.top, closeTo(college.top, 0.5));
+    expect(college.width, greaterThan(100));
+    expect(
+      tester.getSize(find.text('College')).height,
+      lessThan(30),
+      reason: 'stage labels must stay on a single line',
+    );
+  });
+
   testWidgets('delete person is hidden when adding a new person', (
     WidgetTester tester,
   ) async {
