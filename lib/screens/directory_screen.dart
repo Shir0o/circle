@@ -7,12 +7,17 @@ import '../providers/people_provider.dart';
 import '../theme/design_tokens.dart';
 import 'profile_screen.dart';
 
-class DirectoryScreen extends StatelessWidget {
+class DirectoryScreen extends StatefulWidget {
   final ValueChanged<int>? onSwitchTab;
   final VoidCallback? onOpenAdd;
 
   const DirectoryScreen({super.key, this.onSwitchTab, this.onOpenAdd});
 
+  @override
+  State<DirectoryScreen> createState() => _DirectoryScreenState();
+}
+
+class _DirectoryScreenState extends State<DirectoryScreen> {
   static const _filterDefs = [
     ('all', 'All'),
     ('child', 'Kids'),
@@ -20,6 +25,32 @@ class DirectoryScreen extends StatelessWidget {
     ('college', 'College'),
     ('working', 'Working'),
   ];
+
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Keep the field in step with the provider, including external resets.
+    final query = Provider.of<PeopleProvider>(context).searchQuery;
+    if (_searchController.text != query) {
+      _searchController.value = TextEditingValue(
+        text: query,
+        selection: TextSelection.collapsed(offset: query.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _clearSearch(PeopleProvider provider) {
+    _searchController.clear();
+    provider.setSearchQuery('');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +118,7 @@ class DirectoryScreen extends StatelessWidget {
                         child: InkWell(
                           key: const Key('add-person-button'),
                           customBorder: const CircleBorder(),
-                          onTap: onOpenAdd,
+                          onTap: widget.onOpenAdd,
                           child: SizedBox(
                             width: 48,
                             height: 48,
@@ -116,7 +147,9 @@ class DirectoryScreen extends StatelessWidget {
             // Next-birthday hint, tappable to jump to the Birthdays tab.
             InkWell(
               key: const Key('next-birthday-hint'),
-              onTap: onSwitchTab == null ? null : () => onSwitchTab!(1),
+              onTap: widget.onSwitchTab == null
+                  ? null
+                  : () => widget.onSwitchTab!(1),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 4, 24, 8),
                 child: Row(
@@ -146,10 +179,12 @@ class DirectoryScreen extends StatelessWidget {
               ),
             ),
 
-            // Search field: no icon, no clear button.
+            // Search field with a leading glyph and an in-field clear action.
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 2, 22, 10),
               child: TextField(
+                key: const Key('directory-search-field'),
+                controller: _searchController,
                 onChanged: (val) => provider.setSearchQuery(val),
                 decoration: InputDecoration(
                   hintText: 'Search people',
@@ -163,8 +198,35 @@ class DirectoryScreen extends StatelessWidget {
                   hintStyle: GoogleFonts.nunito(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w600,
-                    color: tokens.faint2,
+                    color: tokens.faint,
                   ),
+                  prefixIcon: ExcludeSemantics(
+                    child: Icon(
+                      Icons.search_rounded,
+                      size: 20,
+                      color: tokens.muted,
+                    ),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 48,
+                  ),
+                  suffixIcon: provider.searchQuery.isEmpty
+                      ? null
+                      : IconButton(
+                          key: const Key('directory-clear-search'),
+                          tooltip: 'Clear search',
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
+                          icon: Icon(
+                            Icons.close_rounded,
+                            size: 18,
+                            color: tokens.muted,
+                          ),
+                          onPressed: () => _clearSearch(provider),
+                        ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide(color: tokens.inputBorder),
@@ -252,12 +314,57 @@ class DirectoryScreen extends StatelessWidget {
 
     if (people.isEmpty) {
       return Center(
-        child: Text(
-          'No one matches that yet.',
-          style: GoogleFonts.nunito(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: tokens.faint,
+        child: SingleChildScrollView(
+          // The shell extends the body under the translucent tab bar, so the
+          // recovery action needs room to scroll clear of it.
+          padding: EdgeInsets.fromLTRB(
+            24,
+            0,
+            24,
+            80 + MediaQuery.paddingOf(context).bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.search_off_rounded, size: 36, color: tokens.faint),
+              const SizedBox(height: 10),
+              Text(
+                'No one matches that yet.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: tokens.muted,
+                ),
+              ),
+              const SizedBox(height: 14),
+              OutlinedButton(
+                key: const Key('directory-clear-filters'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: tokens.accentDeep,
+                  minimumSize: const Size(48, 48),
+                  side: BorderSide(color: tokens.chipBorder),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                ),
+                onPressed: () {
+                  _clearSearch(provider);
+                  provider.setStageFilter('all');
+                },
+                child: Text(
+                  'Clear filters',
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       );

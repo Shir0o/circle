@@ -13,6 +13,8 @@ class AppTheme {
 
   static ThemeData _theme(Brightness brightness, DesignTokens t) {
     final dark = brightness == Brightness.dark;
+    final baseTextTheme =
+        (dark ? ThemeData.dark() : ThemeData.light()).textTheme;
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
@@ -30,41 +32,55 @@ class AppTheme {
         onSurfaceVariant: t.text2,
         outline: t.border,
       ),
-      textTheme:
-          GoogleFonts.nunitoTextTheme(
-            dark ? ThemeData.dark().textTheme : null,
-          ).copyWith(
-            displayLarge: GoogleFonts.nunito(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: t.text,
-            ),
-            titleLarge: GoogleFonts.nunito(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: t.text,
-            ),
-            titleMedium: GoogleFonts.nunito(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: t.text,
-            ),
-            bodyLarge: GoogleFonts.nunito(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: t.text,
-            ),
-            bodyMedium: GoogleFonts.nunito(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: t.text2,
-            ),
-            bodySmall: GoogleFonts.nunito(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: t.muted,
-            ),
-          ),
+      textTheme: TextTheme(
+        displayLarge: GoogleFonts.nunito(
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+          color: t.text,
+        ),
+        displayMedium: GoogleFonts.nunito(
+          textStyle: baseTextTheme.displayMedium,
+        ),
+        displaySmall: GoogleFonts.nunito(textStyle: baseTextTheme.displaySmall),
+        headlineLarge: GoogleFonts.nunito(
+          textStyle: baseTextTheme.headlineLarge,
+        ),
+        headlineMedium: GoogleFonts.nunito(
+          textStyle: baseTextTheme.headlineMedium,
+        ),
+        headlineSmall: GoogleFonts.nunito(
+          textStyle: baseTextTheme.headlineSmall,
+        ),
+        titleLarge: GoogleFonts.nunito(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: t.text,
+        ),
+        titleMedium: GoogleFonts.nunito(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: t.text,
+        ),
+        titleSmall: GoogleFonts.nunito(textStyle: baseTextTheme.titleSmall),
+        bodyLarge: GoogleFonts.nunito(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: t.text,
+        ),
+        bodyMedium: GoogleFonts.nunito(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: t.text2,
+        ),
+        bodySmall: GoogleFonts.nunito(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: t.muted,
+        ),
+        labelLarge: GoogleFonts.nunito(textStyle: baseTextTheme.labelLarge),
+        labelMedium: GoogleFonts.nunito(textStyle: baseTextTheme.labelMedium),
+        labelSmall: GoogleFonts.nunito(textStyle: baseTextTheme.labelSmall),
+      ),
       cardTheme: CardThemeData(
         color: t.surface,
         elevation: 0,
