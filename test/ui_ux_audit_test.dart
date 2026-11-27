@@ -335,6 +335,38 @@ void main() {
         _expectNoOverflow(tester, '${variant.name}_step5_back');
         expect(find.text('Circle'), findsOneWidget);
         expect(find.byKey(const Key('circle-tab-bar')), findsOneWidget);
+
+        // A search with no matches has to explain itself and offer a way out
+        // rather than leaving a bare list area.
+        await tester.enterText(
+          find.byKey(const Key('directory-search-field')),
+          'zzz',
+        );
+        await tester.pumpAndSettle();
+
+        _expectNoOverflow(tester, '${variant.name}_step6_search_empty');
+        expect(find.byKey(const Key('directory-clear-search')), findsOneWidget);
+        expect(find.text('No one matches that yet.'), findsOneWidget);
+        expect(
+          find.byKey(const Key('directory-clear-filters')),
+          findsOneWidget,
+        );
+        await _expectAccessibilityGuidelines(tester);
+        await _maybeStepGolden(
+          tester,
+          'circle_step6_search_empty.png',
+          variant: variant,
+        );
+
+        await tester.ensureVisible(
+          find.byKey(const Key('directory-clear-filters')),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('directory-clear-filters')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Diego Morales'), findsOneWidget);
+        expect(find.byKey(const Key('directory-clear-search')), findsNothing);
       } finally {
         // Must be disposed before the end-of-test verifications run.
         semantics.dispose();

@@ -249,4 +249,61 @@ void main() {
     expect(find.text('May 20, 2003'), findsOneWidget);
     expect(find.text('Aug 1990'), findsOneWidget);
   });
+
+  testWidgets('clear-search button clears the field and restores all people', (
+    WidgetTester tester,
+  ) async {
+    await pumpCircle(
+      tester,
+      people: [
+        person(id: 1, name: 'Maya Chen', stage: LifeStage.college),
+        person(id: 2, name: 'Diego Morales', stage: LifeStage.working),
+      ],
+    );
+
+    final searchField = find.byKey(const Key('directory-search-field'));
+    await tester.enterText(searchField, 'Maya');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Diego Morales'), findsNothing);
+    expect(find.byKey(const Key('directory-clear-search')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('directory-clear-search')));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<TextField>(searchField).controller!.text, isEmpty);
+    expect(find.text('Maya Chen'), findsOneWidget);
+    expect(find.text('Diego Morales'), findsOneWidget);
+    expect(find.byKey(const Key('directory-clear-search')), findsNothing);
+  });
+
+  testWidgets('clear filters resets both the search query and stage filter', (
+    WidgetTester tester,
+  ) async {
+    await pumpCircle(
+      tester,
+      people: [
+        person(id: 1, name: 'Maya Chen', stage: LifeStage.college),
+        person(id: 2, name: 'Sofia Reyes', stage: LifeStage.kids),
+      ],
+    );
+
+    final searchField = find.byKey(const Key('directory-search-field'));
+    await tester.tap(find.byKey(const Key('chip-child')));
+    await tester.pumpAndSettle();
+    await tester.enterText(searchField, 'zzz');
+    await tester.pumpAndSettle();
+
+    expect(find.text('No one matches that yet.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('directory-clear-filters')));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<TextField>(searchField).controller!.text, isEmpty);
+    expect(find.text('Maya Chen'), findsOneWidget);
+    expect(find.text('Sofia Reyes'), findsOneWidget);
+    expect(find.text('2 of 2 people'), findsOneWidget);
+    // The All chip is active again, so its dot is hidden.
+    expect(find.byKey(const Key('chip-dot-all')), findsNothing);
+  });
 }
