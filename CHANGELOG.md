@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/Shir0o/circle/compare/v1.3.0...v1.3.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* **ui:** improve directory search affordance and filter recovery ([#52](https://github.com/Shir0o/circle/issues/52)) ([eb61814](https://github.com/Shir0o/circle/commit/eb61814e85d23e9b766ed97d1b3be6eb50ae2cfb))
+
 ## [1.3.0](https://github.com/Shir0o/circle/compare/v1.2.2...v1.3.0) (2026-11-20)
 
 
